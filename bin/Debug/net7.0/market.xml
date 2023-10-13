@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>market</name>
+    </assembly>
+    <members>
+        <member name="M:market.Extensions.ModelBuilderExtensions.RegisterEntityTypeConfiguration(Microsoft.EntityFrameworkCore.ModelBuilder,System.Reflection.Assembly)">
+            <summary>
+                Dynamically load all IEntityTypeConfiguration with Reflection
+            </summary>
+            <param name="modelBuilder"></param>
+            <param name="assemblies">Assemblies contains Entities</param>
+        </member>
+        <member name="M:market.Extensions.ModelBuilderExtensions.RegisterAllEntities``1(Microsoft.EntityFrameworkCore.ModelBuilder,System.Reflection.Assembly[])">
+            <summary>
+                Dynamically register all Entities that inherit from specific BaseType
+            </summary>
+            <param name="modelBuilder"></param>
+            <param name="assemblies">Assemblies contains Entities</param>
+        </member>
+        <member name="T:market.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:market.Migrations.user">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.user.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.user.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.user.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:market.Migrations.uuid">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.uuid.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.uuid.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.uuid.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

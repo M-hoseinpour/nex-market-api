@@ -52,3 +52,5 @@ D:\develop\market\bin\Debug\net7.0\Microsoft.IdentityModel.Protocols.dll
 D:\develop\market\bin\Debug\net7.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 D:\develop\market\bin\Debug\net7.0\Microsoft.IdentityModel.Tokens.dll
 D:\develop\market\bin\Debug\net7.0\System.IdentityModel.Tokens.Jwt.dll
+D:\develop\market\bin\Debug\net7.0\market.xml
+D:\develop\market\obj\Debug\net7.0\market.xml

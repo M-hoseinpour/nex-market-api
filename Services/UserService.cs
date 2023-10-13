@@ -6,19 +6,25 @@ using market.SystemServices.Contracts;
 using System.Security.Claims;
 using market.Exceptions;
 using market.Services.UserService.Exceptions;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 public class UserService
 {
     private readonly IRepository<User> _userRepository;
     private readonly IPasswordService _passwordService;
     private readonly IJwtService _jwtService;
+    private readonly IWorkContext _workContext;
+    private readonly IMapper _mapper;
 
 
-    public UserService(IRepository<User> userRepository, IPasswordService passwordService, IJwtService jwtService)
+    public UserService(IRepository<User> userRepository, IPasswordService passwordService, IJwtService jwtService, IWorkContext workContext, IMapper mapper)
     {
         _userRepository = userRepository;
         _passwordService = passwordService;
         _jwtService = jwtService;
+        _workContext = workContext;
+        _mapper = mapper;
     }
 
     public async Task<RegisterResponse> RegisterUser(RegisterInput input, CancellationToken cancellationToken)
@@ -59,6 +65,16 @@ public class UserService
         var token = _jwtService.GenerateToken(claims, ref expiresIn);
 
         return new RegisterResponse { Token = token };
+
+    }
+
+    public async Task<ProfileBriefResponse> GetBriefProfile(CancellationToken cancellationToken)
+    {
+        var userId = _workContext.GetUserId();
+        return await _userRepository.Table
+            .Where(x => x.Id == userId)
+            .ProjectTo<ProfileBriefResponse>(_mapper.ConfigurationProvider)
+            .SingleOrDefaultAsync(cancellationToken) ?? throw new UserNotFoundException();
 
     }
 }

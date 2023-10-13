@@ -8,6 +8,11 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using market.Extensions;
 using Microsoft.Extensions.Options;
 using ApiFramework.Middlewares;
+using System.Reflection;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.OpenApi.Models;
+using market.Configuration.Swagger;
+using market.SystemServices.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +28,46 @@ IConfiguration configuration = configer.Build();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(
+    c =>
+    {
+        var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+        var filePath = Path.Combine(path1: AppContext.BaseDirectory, path2: assemblyName + ".xml");
+        c.IncludeXmlComments(filePath);
+
+        c.SchemaGeneratorOptions = new SchemaGeneratorOptions
+        {
+            SchemaIdSelector = type => type.FullName
+        };
+        c.AddSecurityDefinition(
+            name: "Bearer",
+            securityScheme: new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme.",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer"
+            }
+        );
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
+        c.OperationFilter<SecurityRequirementsOperationFilter>();
+        // c.EnableAnnotations();
+    }
+);
 
 var connectionString = configuration.GetConnectionString("MainDb");
 builder.Services.AddDbContext<ApplicationDbContext>(x => x.UseNpgsql(connectionString));
@@ -37,6 +81,8 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<UserService>();
 builder.Services.AddSingleton<IJwtService, JwtService>();
 builder.Services.AddSingleton<IPasswordService, PasswordService>();
+builder.Services.AddSingleton<IWorkContext, WorkContext>();
+
 
 
 builder.Services
@@ -49,8 +95,10 @@ builder.Services
     );
 
 builder.Services.AddJwtAuthentication(configuration);
+builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddCors(options =>
 {
@@ -74,10 +122,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseAuthentication();
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
+app.UseCors(); 
 app.MapControllers();
 
 app.Run();

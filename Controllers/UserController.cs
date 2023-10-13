@@ -1,3 +1,4 @@
+using market.Models.Domain;
 using market.Models.DTO.User;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,5 +23,11 @@ public class UsersController : ControllerBase
     public async Task<RegisterResponse> LoginUser(RegisterInput registerInput, CancellationToken cancellationToken)
     {
         return await _userService.LoginUser(registerInput, cancellationToken);
+    }
+
+    [HttpGet("profile")]
+    public async Task<ProfileBriefResponse> GetBriefProfile(CancellationToken cancellationToken)
+    {
+        return await _userService.GetBriefProfile(cancellationToken: cancellationToken);
     }
 }
