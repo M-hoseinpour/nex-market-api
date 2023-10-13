@@ -44,3 +44,11 @@ D:\develop\market\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.Design.dll
 D:\develop\market\bin\Debug\net7.0\Microsoft.Extensions.DependencyModel.dll
 D:\develop\market\bin\Debug\net7.0\Mono.TextTemplating.dll
 D:\develop\market\bin\Debug\net7.0\System.CodeDom.dll
+D:\develop\market\bin\Debug\net7.0\BCrypt.Net-Next.dll
+D:\develop\market\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\develop\market\bin\Debug\net7.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\develop\market\bin\Debug\net7.0\Microsoft.IdentityModel.Logging.dll
+D:\develop\market\bin\Debug\net7.0\Microsoft.IdentityModel.Protocols.dll
+D:\develop\market\bin\Debug\net7.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+D:\develop\market\bin\Debug\net7.0\Microsoft.IdentityModel.Tokens.dll
+D:\develop\market\bin\Debug\net7.0\System.IdentityModel.Tokens.Jwt.dll

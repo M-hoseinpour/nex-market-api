@@ -1,4 +1,5 @@
 using market.Models.Domain;
+using market.Models.DTO.User;
 using Microsoft.AspNetCore.Mvc;
 
 namespace market.Controllers;
@@ -13,11 +14,14 @@ public class UsersController : ControllerBase
         _userService = userService;
     }
 
-    [HttpGet]
-
-    public async Task<User> GetUsers()
+    [HttpPost("register")]
+    public async Task<RegisterResponse> RegisterUser(RegisterInput registerInput, CancellationToken cancellationToken)
     {
-        // return await _userService.GetUsers();
-        return null;
+        return await _userService.RegisterUser(registerInput, cancellationToken);
+    }
+    [HttpPost("login")]
+    public async Task<RegisterResponse> LoginUser(RegisterInput registerInput, CancellationToken cancellationToken)
+    {
+        return await _userService.LoginUser(registerInput, cancellationToken);
     }
 }
