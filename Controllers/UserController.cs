@@ -1,11 +1,10 @@
-using market.Models.Domain;
 using market.Models.DTO.User;
 using Microsoft.AspNetCore.Mvc;
 
 namespace market.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/users")]
 public class UsersController : ControllerBase
 {
     private readonly UserService _userService;

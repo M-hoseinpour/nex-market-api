@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using market.Exceptions;
 using market.SystemServices;
-using market.SystemServices;
 
 namespace market.Extensions;
 
