@@ -1,4 +1,5 @@
 using Auctioneer.Data.Extensions;
+using market.Data.Domain;
 using market.Models.Common;
 using market.Models.Enum;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +13,13 @@ public class User : Entity
     public string? LastName { get; set; }
     public required string Email { get; set; }
     public required string Password { get; set; }
-    public int MobileNumber { get; set; }
+    public string? MobileNumber { get; set; }
     public UserState UserState { get; set; } = UserState.Pending;
-    public Role Role { get; set; } = Role.Customer;
     public string? AvatarLogo { get; set; }
     public string? EmailVerifiedAt { get; set; }
     public string? Setting { get; set; }
+    public int RoleId { get; set; }
+    public virtual Role? Role { get; set; }
     public virtual Customer? Customer { get; set; }
     public virtual Staff? Staff { get; set; }
     public virtual Manager? Manager { get; set; }
@@ -38,12 +40,17 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.Password).IsRequired();
         builder.Property(x => x.FirstName);
         builder.Property(x => x.LastName);
-        builder.Property(x => x.Role).HasDefaultValue(Role.Customer);
+        builder.Property(x => x.RoleId).HasDefaultValue(Roles.Customer.Id);
+        builder.Property(x => x.UserState).HasDefaultValue(UserState.Pending);
         builder.Property(x => x.AvatarLogo);
         builder.Property(x => x.Setting);
         builder.Property(x => x.EmailVerifiedAt);
         builder.Property(x => x.MobileNumber);
 
         builder.HasIndex(x => x.Email).IsUnique();
+        builder
+           .HasOne(x => x.Role)
+           .WithMany()
+           .HasForeignKey(x => x.RoleId);
     }
 }

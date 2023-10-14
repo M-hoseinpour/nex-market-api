@@ -30,4 +30,27 @@ public class UsersController : ControllerBase
     {
         return await _userService.GetBriefProfile(cancellationToken: cancellationToken);
     }
+
+    [HttpPatch("profile/{field}")]
+    public async Task UpdateProfileField(
+    string field,
+    UpdateFieldInput input,
+    CancellationToken cancellationToken
+)
+    {
+        await _userService.UpdateProfileField(
+            field: field,
+            input: input,
+            cancellationToken: cancellationToken
+        );
+    }
+
+    [HttpPost("profile")]
+    public async Task<ProfileBriefResponse> CompleteProfile(
+    ProfileInput input,
+    CancellationToken cancellationToken
+)
+    {
+        return await _userService.CompleteProfile(input: input, cancellationToken: cancellationToken);
+    }
 }
