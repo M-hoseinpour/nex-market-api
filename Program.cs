@@ -12,7 +12,8 @@ using System.Reflection;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.OpenApi.Models;
 using market.Configuration.Swagger;
-using market.SystemServices.Contracts;
+using System.Text.Json.Serialization;
+using market.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +69,19 @@ builder.Services.AddSwaggerGen(
         // c.EnableAnnotations();
     }
 );
+
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(
+        options =>
+        {
+            options.JsonSerializerOptions.DefaultIgnoreCondition =
+            JsonIgnoreCondition.WhenWritingNull;
+            options.JsonSerializerOptions.Converters.Add(new DateTimeIsoConverter());
+            options.JsonSerializerOptions.Converters.Add(new TimeOnlyConverter());
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        }
+    );
 
 var connectionString = configuration.GetConnectionString("MainDb");
 builder.Services.AddDbContext<ApplicationDbContext>(x => x.UseNpgsql(connectionString));
@@ -125,7 +139,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseHttpsRedirection();
 app.UseAuthorization();
-app.UseCors(); 
+app.UseCors();
 app.MapControllers();
 
 app.Run();

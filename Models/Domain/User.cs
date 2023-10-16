@@ -47,7 +47,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.EmailVerifiedAt);
         builder.Property(x => x.MobileNumber);
 
-        builder.HasIndex(x => x.Email).IsUnique();
         builder
            .HasOne(x => x.Role)
            .WithMany()

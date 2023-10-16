@@ -7,7 +7,7 @@ namespace market.Models.Domain;
 
 public class Manager : Entity
 {
-    public required string NationalId { get; set; }
+    public string? NationalId { get; set; }
     public string? DocumentUrl { get; set; }
     public int UserId { get; set; }
     public virtual required User User { get; set; }

@@ -78,5 +78,29 @@
         <member name="M:market.Migrations.mobilNumberType.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:market.Migrations.deleteEmailUniqueness">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.deleteEmailUniqueness.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.deleteEmailUniqueness.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.deleteEmailUniqueness.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:market.Migrations.deleteMangerNationlIdUniqueness">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.deleteMangerNationlIdUniqueness.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.deleteMangerNationlIdUniqueness.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.deleteMangerNationlIdUniqueness.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
     </members>
 </doc>
