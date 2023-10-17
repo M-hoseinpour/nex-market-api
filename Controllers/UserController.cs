@@ -33,9 +33,9 @@ public class UsersController : ControllerBase
 
     [HttpPatch("profile/{field}")]
     public async Task UpdateProfileField(
-    string field,
-    UpdateFieldInput input,
-    CancellationToken cancellationToken
+        string field,
+        UpdateFieldInput input,
+        CancellationToken cancellationToken
 )
     {
         await _userService.UpdateProfileField(

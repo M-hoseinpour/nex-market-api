@@ -11,7 +11,7 @@ public class Manager : Entity
     public string? DocumentUrl { get; set; }
     public int UserId { get; set; }
     public virtual required User User { get; set; }
-
+    public virtual Panel? Panel { get; set; }
 }
 
 public class ManagerConfiguration : IEntityTypeConfiguration<Manager>

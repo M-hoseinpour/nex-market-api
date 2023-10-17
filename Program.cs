@@ -92,10 +92,11 @@ Configure<JwtServiceSettings>(services: builder.Services, key: nameof(JwtService
 
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped<UserService>();
 builder.Services.AddSingleton<IJwtService, JwtService>();
 builder.Services.AddSingleton<IPasswordService, PasswordService>();
 builder.Services.AddSingleton<IWorkContext, WorkContext>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<PanelService>();
 
 
 

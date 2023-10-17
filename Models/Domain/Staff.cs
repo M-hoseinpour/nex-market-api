@@ -11,6 +11,8 @@ public class Staff : Entity
     public int ApproverId { get; set; }
     public int UserId { get; set; }
     public virtual required User User { get; set; }
+    public int PanelId { get; set; }
+    public virtual Panel? Panel { get; set; }
 
 }
 
@@ -31,6 +33,7 @@ public class StaffConfiguration : IEntityTypeConfiguration<Staff>
          .HasOne(x => x.User)
          .WithOne(x => x.Staff)
          .HasForeignKey<Staff>(x => x.UserId);
+         
 
     }
 }
