@@ -18,7 +18,7 @@ public class ProfileBriefResponseMap : Profile
     public ProfileBriefResponseMap()
     {
         CreateMap<User, ProfileBriefResponse>()
-        .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.Slug))
+        .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.UserType.ToString()))
         .ForMember(dest => dest.UserState, opt => opt.MapFrom(src => src.UserState.ToString())); // Maps the enum string representation
 
     }

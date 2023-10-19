@@ -126,5 +126,29 @@
         <member name="M:market.Migrations.fixPanel.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:market.Migrations.changeRoleToUserType">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.changeRoleToUserType.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.changeRoleToUserType.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.changeRoleToUserType.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:market.Migrations.nullableStaffPanelId">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.nullableStaffPanelId.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.nullableStaffPanelId.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:market.Migrations.nullableStaffPanelId.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
     </members>
 </doc>

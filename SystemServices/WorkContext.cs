@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using market.Exceptions;
+using market.Models.Enum;
 using market.SystemServices.Contracts;
 
 namespace market.SystemServices;
@@ -29,12 +30,12 @@ public class WorkContext : IWorkContext
         throw new BadAuthorizationTokenException();
     }
 
-    public int GetRoleId()
+    public UserType GetUserType()
     {
-        var userClaim = GetCurrentRoleIdClaim();
+        var userClaim = GetCurrentUserTypeClaim();
 
-        if (int.TryParse(userClaim.Value, out var roleId))
-            return roleId;
+        if (Enum.TryParse(userClaim.Value, out UserType userType))
+            return userType;
 
         throw new BadAuthorizationTokenException();
     }
@@ -60,9 +61,9 @@ public class WorkContext : IWorkContext
         return GetClaim(claimType);
     }
 
-    public Claim GetCurrentRoleIdClaim()
+    public Claim GetCurrentUserTypeClaim()
     {
-        var claimType = "role-id";
+        var claimType = "user-type";
         return GetClaim(claimType);
     }
 

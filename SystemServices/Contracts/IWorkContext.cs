@@ -1,13 +1,14 @@
 using System.Security.Claims;
+using market.Models.Enum;
 
 namespace market.SystemServices.Contracts;
 
 public interface IWorkContext
 {
     int GetUserId();
-    int GetRoleId();
+    UserType GetUserType();
     bool IsAuthenticated();
     string GetTokenFromHeader();
-    Claim GetCurrentRoleIdClaim();
+    Claim GetCurrentUserTypeClaim();
     Claim GetCurrentUserIdClaim();
 }

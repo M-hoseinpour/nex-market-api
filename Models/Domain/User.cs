@@ -18,8 +18,7 @@ public class User : Entity
     public string? AvatarLogo { get; set; }
     public string? EmailVerifiedAt { get; set; }
     public string? Setting { get; set; }
-    public int RoleId { get; set; }
-    public virtual Role? Role { get; set; }
+    public UserType UserType { get; set; }
     public virtual Customer? Customer { get; set; }
     public virtual Staff? Staff { get; set; }
     public virtual Manager? Manager { get; set; }
@@ -40,16 +39,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.Password).IsRequired();
         builder.Property(x => x.FirstName);
         builder.Property(x => x.LastName);
-        builder.Property(x => x.RoleId).HasDefaultValue(Roles.Customer.Id);
+        builder.Property(x => x.UserType).HasDefaultValue(UserType.Customer);
         builder.Property(x => x.UserState).HasDefaultValue(UserState.Pending);
         builder.Property(x => x.AvatarLogo);
         builder.Property(x => x.Setting);
         builder.Property(x => x.EmailVerifiedAt);
         builder.Property(x => x.MobileNumber);
-
-        builder
-           .HasOne(x => x.Role)
-           .WithMany()
-           .HasForeignKey(x => x.RoleId);
     }
 }

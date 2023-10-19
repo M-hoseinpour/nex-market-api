@@ -2,6 +2,7 @@ using ApiFramework.Exceptions;
 using market.Data.Repository;
 using market.Exceptions;
 using market.Models.Domain;
+using market.Models.Enum;
 using market.SystemServices.Contracts;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,9 +26,9 @@ public class PanelService
     public async Task AddPanel(PanelInput panelInput, CancellationToken cancellationToken)
     {
         var userId = _workContext.GetUserId();
-        var roleId = _workContext.GetRoleId();
+        var userType = _workContext.GetUserType();
 
-        if (Roles.Manager.Id != roleId) throw new BadIdentityException("user is not manger!");
+        if (UserType.Manager != userType) throw new BadIdentityException("user is not manger!");
 
         var manager = await _managerRepository.TableNoTracking.Where(u => u.UserId == userId).SingleOrDefaultAsync() ?? throw new NotFoundException("user is not found!");
         var panel = new Panel { ManagerId = manager.Id, Name = panelInput.Name };

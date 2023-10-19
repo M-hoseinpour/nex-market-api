@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using market;
@@ -11,9 +12,11 @@ using market;
 namespace market.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231019171025_changeRoleToUserType")]
+    partial class changeRoleToUserType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -252,7 +255,7 @@ namespace market.Migrations
                     b.Property<int>("NationalId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("PanelId")
+                    b.Property<int>("PanelId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdateMoment")
@@ -388,7 +391,9 @@ namespace market.Migrations
                 {
                     b.HasOne("market.Models.Domain.Panel", "Panel")
                         .WithMany("Staffs")
-                        .HasForeignKey("PanelId");
+                        .HasForeignKey("PanelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("market.Models.Domain.User", "User")
                         .WithOne("Staff")

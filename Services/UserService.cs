@@ -10,8 +10,6 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using market.Models.Enum;
 using Microsoft.IdentityModel.Tokens;
-using market.Data.Domain;
-using market.Migrations;
 
 public class UserService
 {
@@ -47,19 +45,8 @@ public class UserService
 
     public async Task<RegisterResponse> RegisterUser(RegisterInput input, CancellationToken cancellationToken)
     {
-
-        var userRole = Roles.Customer;
-        if (input.UserType == UserType.Staff)
-        {
-            userRole = Roles.Staff;
-        }
-        if (input.UserType == UserType.Manager)
-        {
-            userRole = Roles.Manager;
-        }
-
         var user = await _userRepository.TableNoTracking
-          .SingleOrDefaultAsync(x => x.Email == input.Email && x.Role == userRole, cancellationToken);
+          .SingleOrDefaultAsync(x => x.Email == input.Email && x.UserType == input.UserType, cancellationToken);
 
         if (user is not null)
             throw new AlreadyRegisteredException();
@@ -68,10 +55,15 @@ public class UserService
         {
             Password = _passwordService.Hash(input.Password),
             Email = input.Email,
-            RoleId = userRole.Id
+            UserType = input.UserType
         };
 
         await _userRepository.AddAsync(newUser, cancellationToken);
+
+        var claims = new List<Claim> {
+            new(type: "user-id", value: newUser.Id.ToString()),
+            new(type: "user-type", value: newUser.UserType.ToString())
+        };
 
         if (input.UserType == UserType.Customer)
         {
@@ -82,54 +74,47 @@ public class UserService
         if (input.UserType == UserType.Staff)
         {
             var newStaff = new Staff { User = newUser };
-            await _staffRepository.AddAsync(newStaff, cancellationToken);
+            var staff = await _staffRepository.AddAsync(newStaff, cancellationToken);
+            claims.Add(new(type: "staff-id", value: staff.Id.ToString()));
         }
 
         if (input.UserType == UserType.Manager)
         {
             var newManager = new Manager { User = newUser };
-            await _managerRepository.AddAsync(newManager, cancellationToken);
+            var manager = await _managerRepository.AddAsync(newManager, cancellationToken);
+            claims.Add(new(type: "manager-id", value: manager.Id.ToString()));
         }
-
-        var claims = new List<Claim>
-        {
-            new(type: "user-id", value: newUser.Id.ToString()),
-            new(type: "role-id", value: newUser.RoleId.ToString())
-        };
 
         long expiresIn = 0;
         var token = _jwtService.GenerateToken(claims, ref expiresIn);
-
-        return new RegisterResponse
-        {
-            Token = token
-        };
+        return new RegisterResponse { Token = token };
     }
 
     public async Task<RegisterResponse> LoginUser(RegisterInput input, CancellationToken cancellationToken)
     {
-        var role = Roles.Customer;
-        if (input.UserType == UserType.Staff)
-        {
-            role = Roles.Staff;
-        }
-        if (input.UserType == UserType.Manager)
-        {
-            role = Roles.Manager;
-        }
-
         var user = await _userRepository.Table
-          .Where(x => x.Email == input.Email && x.Role == role)
+          .Where(x => x.Email == input.Email && x.UserType == input.UserType)
           .SingleOrDefaultAsync(cancellationToken) ?? throw new UserNotFoundException();
 
         if (_passwordService.Verify(input.Password, user.Password) is false)
             throw new BadCredentialsException();
 
-        var claims = new List<Claim>
-        {
+        var claims = new List<Claim> {
             new(type: "user-id", value: user.Id.ToString()),
-            new(type: "role-id", value: user.RoleId.ToString())
+            new(type: "user-type", value: user.UserType.ToString())
         };
+
+        if (input.UserType == UserType.Staff)
+        {
+            var staff = CheckIsStaffExist(user.Id) ?? throw new UserNotFoundException();
+            claims.Add(new(type: "staff-id", value: staff.Id.ToString()));
+        }
+
+        if (input.UserType == UserType.Manager)
+        {
+            var manager = CheckIsManagerExist(user.Id) ?? throw new UserNotFoundException();
+            claims.Add(new(type: "manager-id", value: manager.Id.ToString()));
+        }
 
         long expiresIn = 0;
         var token = _jwtService.GenerateToken(claims, ref expiresIn);
@@ -138,13 +123,26 @@ public class UserService
 
     }
 
+    private async Task<Customer?> CheckIsCustomerExist(int customerId)
+    {
+        return await _customerRepository.TableNoTracking.Where(c => c.Id == customerId).SingleOrDefaultAsync();
+    }
+    private async Task<Staff?> CheckIsStaffExist(int customerId)
+    {
+        return await _staffRepository.TableNoTracking.Where(c => c.Id == customerId).SingleOrDefaultAsync();
+    }
+    private async Task<Manager?> CheckIsManagerExist(int customerId)
+    {
+        return await _managerRepository.TableNoTracking.Where(c => c.Id == customerId).SingleOrDefaultAsync();
+    }
+
     public async Task<ProfileBriefResponse> GetBriefProfile(CancellationToken cancellationToken)
     {
         var userId = _workContext.GetUserId();
-        var roleId = _workContext.GetRoleId();
+        var userType = _workContext.GetUserType();
 
         return await _userRepository.Table
-            .Where(x => x.Id == userId && x.RoleId == roleId)
+            .Where(x => x.Id == userId && x.UserType == userType)
             .ProjectTo<ProfileBriefResponse>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(cancellationToken) ?? throw new UserNotFoundException();
     }
@@ -156,10 +154,10 @@ public class UserService
         )
     {
         var userId = _workContext.GetUserId();
-        var roleId = _workContext.GetRoleId();
+        var userType = _workContext.GetUserType();
 
         var user = await _userRepository.Table
-            .Where(x => x.Id == userId && x.RoleId == roleId)
+            .Where(x => x.Id == userId && x.UserType == userType)
             .SingleOrDefaultAsync(cancellationToken) ?? throw new UserNotFoundException();
 
         if (!Enum.TryParse<UserUpdateField>(
@@ -199,10 +197,10 @@ public class UserService
     public async Task<ProfileBriefResponse> CompleteProfile(ProfileInput input, CancellationToken cancellationToken)
     {
         var userId = _workContext.GetUserId();
-        var roleId = _workContext.GetRoleId();
+        var userType = _workContext.GetUserType();
 
         var currentUser = await _userRepository.Table
-            .Where(x => x.Id == userId && roleId == x.RoleId)
+            .Where(x => x.Id == userId && userType == x.UserType)
             .SingleOrDefaultAsync(cancellationToken) ?? throw new NotFoundException("user not Found!");
 
         currentUser.FirstName = input.FirstName;
