@@ -123,17 +123,17 @@ public class UserService
 
     }
 
-    private async Task<Customer?> CheckIsCustomerExist(int customerId)
+    public async Task<Customer?> CheckIsCustomerExist(int userId)
     {
-        return await _customerRepository.TableNoTracking.Where(c => c.Id == customerId).SingleOrDefaultAsync();
+        return await _customerRepository.TableNoTracking.Where(c => c.UserId == userId).SingleOrDefaultAsync();
     }
-    private async Task<Staff?> CheckIsStaffExist(int customerId)
+    public async Task<Staff?> CheckIsStaffExist(int userId)
     {
-        return await _staffRepository.TableNoTracking.Where(c => c.Id == customerId).SingleOrDefaultAsync();
+        return await _staffRepository.TableNoTracking.Where(c => c.UserId == userId).SingleOrDefaultAsync();
     }
-    private async Task<Manager?> CheckIsManagerExist(int customerId)
+    public async Task<Manager?> CheckIsManagerExist(int userId)
     {
-        return await _managerRepository.TableNoTracking.Where(c => c.Id == customerId).SingleOrDefaultAsync();
+        return await _managerRepository.TableNoTracking.Where(c => c.UserId == userId).SingleOrDefaultAsync();
     }
 
     public async Task<ProfileBriefResponse> GetBriefProfile(CancellationToken cancellationToken)

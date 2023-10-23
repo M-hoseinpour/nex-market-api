@@ -19,4 +19,10 @@ public class PanelsController : ControllerBase
     {
         await _panelService.AddPanel(panelInput, cancellationToken);
     }
+
+    [HttpPost("users")]
+    public async Task AddStaff(AddStaffInput addStaffInput, CancellationToken cancellationToken)
+    {
+        await _panelService.AddStaff(addStaffInput, cancellationToken);
+    }
 }
