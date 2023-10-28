@@ -1,7 +1,9 @@
 using ApiFramework.Exceptions;
+using AutoMapper;
 using market.Data.Repository;
 using market.Exceptions;
 using market.Models.Domain;
+using market.Models.DTO.panel;
 using market.Models.Enum;
 using market.SystemServices.Contracts;
 using Microsoft.EntityFrameworkCore;
@@ -13,13 +15,16 @@ public class PanelService
     private readonly IRepository<User> _userRepository;
     private readonly IRepository<Staff> _staffRepository;
     private readonly IWorkContext _workContext;
+    private readonly IMapper _mapper;
+
 
     public PanelService(
         IRepository<Panel> panelRepository,
         IRepository<Manager> managerRepository,
         IRepository<User> userRepository,
         IRepository<Staff> staffRepository,
-        IWorkContext workContext
+        IWorkContext workContext,
+        IMapper mapper
     )
     {
         _panelRepository = panelRepository;
@@ -27,6 +32,7 @@ public class PanelService
         _workContext = workContext;
         _userRepository = userRepository;
         _staffRepository = staffRepository;
+        _mapper = mapper;
     }
 
     public async Task AddPanel(PanelInput panelInput, CancellationToken cancellationToken)
@@ -68,5 +74,38 @@ public class PanelService
         var userType = _workContext.GetUserType();
         if (UserType.Manager != userType) throw new BadIdentityException("user is not manger!");
         return await _managerRepository.TableNoTracking.Where(u => u.UserId == userId).SingleOrDefaultAsync(cancellationToken) ?? throw new NotFoundException("manager is not found!");
+    }
+
+    public async Task<GetPanel> GetPanel(Guid panelGuid, CancellationToken cancellationToken)
+    {
+        var userPanel = await GetUserPanel() ?? throw new NotFoundException("user does Not have a panel!");
+        var panel = await _panelRepository.TableNoTracking.Where(p => p.Uuid == panelGuid).SingleOrDefaultAsync(cancellationToken) ?? throw new NotFoundException("panel not found!");
+        if (panel.Id != userPanel.Id)
+        {
+            throw new NotFoundException("panel not found!");
+        }
+        return _mapper.Map<GetPanel>(panel);
+    }
+
+    public async Task<Panel?> GetUserPanel()
+    {
+        var userId = _workContext.GetUserId();
+        var userType = _workContext.GetUserType();
+
+        if (UserType.Staff == userType)
+        {
+            var staffId = _workContext.GetStaffId();
+            var staff = await _staffRepository.TableNoTracking.Where(S => S.Id == staffId).Include(m => m.Panel).SingleOrDefaultAsync() ?? throw new UserNotFoundException();
+            if (staff.Panel is not null) return staff.Panel;
+
+        }
+
+        if (UserType.Manager == userType)
+        {
+            var managerId = _workContext.GetManagerId();
+            var manager = await _managerRepository.TableNoTracking.Where(S => S.Id == managerId).Include(m => m.Panel).SingleOrDefaultAsync() ?? throw new UserNotFoundException();
+            if (manager.Panel is not null) return manager.Panel;
+        }
+        return null;
     }
 }

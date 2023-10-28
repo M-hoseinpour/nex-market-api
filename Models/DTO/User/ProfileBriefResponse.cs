@@ -11,6 +11,7 @@ public class ProfileBriefResponse
     public string? AvatarLogo { get; set; }
     public string? EmailVerifiedAt { get; set; }
     public string? Setting { get; set; }
+    public Guid? PanelGuid { get; set; }
 }
 
 public class ProfileBriefResponseMap : Profile

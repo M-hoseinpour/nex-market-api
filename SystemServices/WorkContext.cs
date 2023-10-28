@@ -29,6 +29,34 @@ public class WorkContext : IWorkContext
 
         throw new BadAuthorizationTokenException();
     }
+    public int GetStaffId()
+    {
+        var userClaim = GetCurrentStaffIdClaim();
+
+        if (userClaim is null)
+        {
+            throw new BadAuthorizationTokenException();
+        }
+
+        if (int.TryParse(userClaim.Value, out var staffId))
+            return staffId;
+
+        throw new BadAuthorizationTokenException();
+    }
+    public int GetManagerId()
+    {
+        var userClaim = GetCurrentManagerIdClaim();
+
+        if (userClaim is null)
+        {
+            throw new BadAuthorizationTokenException();
+        }
+
+        if (int.TryParse(userClaim.Value, out var managerId))
+            return managerId;
+
+        throw new BadAuthorizationTokenException();
+    }
 
     public UserType GetUserType()
     {
@@ -58,6 +86,16 @@ public class WorkContext : IWorkContext
     public Claim GetCurrentUserIdClaim()
     {
         var claimType = "user-id";
+        return GetClaim(claimType);
+    }
+    public Claim GetCurrentStaffIdClaim()
+    {
+        var claimType = "staff-id";
+        return GetClaim(claimType);
+    }
+    public Claim GetCurrentManagerIdClaim()
+    {
+        var claimType = "manager-id";
         return GetClaim(claimType);
     }
 

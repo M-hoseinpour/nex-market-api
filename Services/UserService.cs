@@ -17,6 +17,7 @@ public class UserService
     private readonly IRepository<Customer> _customerRepository;
     private readonly IRepository<Staff> _staffRepository;
     private readonly IRepository<Manager> _managerRepository;
+    private readonly IRepository<Panel> _panelRepository;
     private readonly IPasswordService _passwordService;
     private readonly IJwtService _jwtService;
     private readonly IWorkContext _workContext;
@@ -28,16 +29,19 @@ public class UserService
         IRepository<Customer> customerRepository,
         IRepository<Staff> staffRepository,
         IRepository<Manager> managerRepository,
+        IRepository<Panel> panelRepository,
         IPasswordService passwordService,
         IJwtService jwtService,
         IWorkContext workContext,
-        IMapper mapper)
+        IMapper mapper
+        )
     {
         _userRepository = userRepository;
         _customerRepository = customerRepository;
         _staffRepository = staffRepository;
         _managerRepository = managerRepository;
         _passwordService = passwordService;
+        _panelRepository = panelRepository;
         _jwtService = jwtService;
         _workContext = workContext;
         _mapper = mapper;
@@ -107,13 +111,19 @@ public class UserService
         if (input.UserType == UserType.Staff)
         {
             var staff = CheckIsStaffExist(user.Id) ?? throw new UserNotFoundException();
-            claims.Add(new(type: "staff-id", value: staff.Id.ToString()));
+            if (staff.Result is not null)
+            {
+                claims.Add(new(type: "staff-id", value: staff.Result.Id.ToString()));
+            }
         }
 
         if (input.UserType == UserType.Manager)
         {
             var manager = CheckIsManagerExist(user.Id) ?? throw new UserNotFoundException();
-            claims.Add(new(type: "manager-id", value: manager.Id.ToString()));
+            if (manager.Result is not null)
+            {
+                claims.Add(new(type: "manager-id", value: manager.Result.Id.ToString()));
+            }
         }
 
         long expiresIn = 0;
@@ -141,10 +151,35 @@ public class UserService
         var userId = _workContext.GetUserId();
         var userType = _workContext.GetUserType();
 
-        return await _userRepository.Table
+        var user = await _userRepository.Table
             .Where(x => x.Id == userId && x.UserType == userType)
-            .ProjectTo<ProfileBriefResponse>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(cancellationToken) ?? throw new UserNotFoundException();
+
+        var userResponse = _mapper.Map<ProfileBriefResponse>(user);
+
+        if (user.UserType == UserType.Staff)
+        {
+            var staff = await CheckIsStaffExist(user.Id) ?? throw new UserNotFoundException();
+            var panel = await _panelRepository.TableNoTracking.SingleOrDefaultAsync(x => x.Id == staff.PanelId, cancellationToken);
+            if (panel is not null)
+            {
+                userResponse.PanelGuid = panel.Uuid;
+            }
+        }
+
+        if (user.UserType == UserType.Manager)
+        {
+            var manager = await _managerRepository.TableNoTracking.Where(c => c.UserId == userId).Include(m => m.Panel).SingleOrDefaultAsync() ?? throw new UserNotFoundException();
+            if (manager.Panel is not null)
+            {
+                var panel = await _panelRepository.TableNoTracking.SingleOrDefaultAsync(x => x.Id == manager.Panel.Id, cancellationToken);
+                if (panel is not null)
+                {
+                    userResponse.PanelGuid = panel.Uuid;
+                }
+            }
+        }
+        return userResponse;
     }
 
     public async Task UpdateProfileField(

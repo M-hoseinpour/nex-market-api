@@ -1,6 +1,7 @@
 
 using market.Data.Repository;
 using market.Models.Domain;
+using market.Models.DTO.panel;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -24,5 +25,11 @@ public class PanelsController : ControllerBase
     public async Task AddStaff(AddStaffInput addStaffInput, CancellationToken cancellationToken)
     {
         await _panelService.AddStaff(addStaffInput, cancellationToken);
+    }
+
+    [HttpGet("{panelGuid:Guid}")]
+    public async Task<GetPanel> GetPanel(Guid panelGuid, CancellationToken cancellationToken)
+    {
+        return await _panelService.GetPanel(panelGuid, cancellationToken);
     }
 }
