@@ -32,4 +32,10 @@ public class PanelsController : ControllerBase
     {
         return await _panelService.GetPanel(panelGuid, cancellationToken);
     }
+
+    [HttpGet("{panelGuid:Guid}/members")]
+    public async Task<IList<PanelMember>?> GetPanelMembers(Guid panelGuid, CancellationToken cancellationToken)
+    {
+        return await _panelService.GetPanelMembers(panelGuid, cancellationToken);
+    }
 }

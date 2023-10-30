@@ -108,4 +108,28 @@ public class PanelService
         }
         return null;
     }
+
+    public async Task<IList<PanelMember>?> GetPanelMembers(Guid panelGuid, CancellationToken cancellationToken)
+    {
+        var userPanel = await GetUserPanel() ?? throw new NotFoundException("user does Not have a panel!");
+        var panel = await _panelRepository.TableNoTracking
+                                .Where(p => p.Uuid == panelGuid)
+                                .Include(p => p.Staffs)
+                                .ThenInclude(s => s.User)
+                                .Include(p => p.Manager)
+                                .ThenInclude(m => m.User)
+                                .SingleOrDefaultAsync(cancellationToken) ?? throw new NotFoundException("panel not found!");
+
+        if (userPanel.Id != panel.Id)
+        {
+            throw new NotFoundException("panel not found!");
+        }
+
+        var staffMembers = _mapper.Map<IList<PanelMember>>(panel.Staffs);
+        var managerMember = _mapper.Map<PanelMember>(panel.Manager.User);
+
+        staffMembers.Insert(0, managerMember);
+
+        return staffMembers;
+    }
 }
