@@ -34,7 +34,7 @@ public class UserService
         IJwtService jwtService,
         IWorkContext workContext,
         IMapper mapper
-        )
+    )
     {
         _userRepository = userRepository;
         _customerRepository = customerRepository;
@@ -50,7 +50,7 @@ public class UserService
     public async Task<RegisterResponse> RegisterUser(RegisterInput input, CancellationToken cancellationToken)
     {
         var user = await _userRepository.TableNoTracking
-          .SingleOrDefaultAsync(x => x.Email == input.Email && x.UserType == input.UserType, cancellationToken);
+            .SingleOrDefaultAsync(x => x.Email == input.Email && x.UserType == input.UserType, cancellationToken);
 
         if (user is not null)
             throw new AlreadyRegisteredException();
@@ -64,7 +64,8 @@ public class UserService
 
         await _userRepository.AddAsync(newUser, cancellationToken);
 
-        var claims = new List<Claim> {
+        var claims = new List<Claim>
+        {
             new(type: "user-id", value: newUser.Id.ToString()),
             new(type: "user-type", value: newUser.UserType.ToString())
         };
@@ -97,53 +98,54 @@ public class UserService
     public async Task<RegisterResponse> LoginUser(RegisterInput input, CancellationToken cancellationToken)
     {
         var user = await _userRepository.Table
-          .Where(x => x.Email == input.Email && x.UserType == input.UserType)
-          .SingleOrDefaultAsync(cancellationToken) ?? throw new UserNotFoundException();
+            .Where(x => x.Email == input.Email && x.UserType == input.UserType)
+            .SingleOrDefaultAsync(cancellationToken) ?? throw new UserNotFoundException();
 
         if (_passwordService.Verify(input.Password, user.Password) is false)
             throw new BadCredentialsException();
 
-        var claims = new List<Claim> {
+        var claims = new List<Claim>
+        {
             new(type: "user-id", value: user.Id.ToString()),
             new(type: "user-type", value: user.UserType.ToString())
         };
 
         if (input.UserType == UserType.Staff)
         {
-            var staff = CheckIsStaffExist(user.Id) ?? throw new UserNotFoundException();
-            if (staff.Result is not null)
-            {
-                claims.Add(new(type: "staff-id", value: staff.Result.Id.ToString()));
-            }
+            var staff = await CheckIsStaffExist(user.Id) ?? throw new UserNotFoundException();
+            claims.Add(new Claim(type: "staff-id", value: staff.Id.ToString()));
+            //todo should make panel id required in staff entity
+            claims.Add(new Claim(type: "panel-id", value: staff.PanelId.ToString() ?? string.Empty));
         }
-
-        if (input.UserType == UserType.Manager)
+        else if (input.UserType == UserType.Manager)
         {
-            var manager = CheckIsManagerExist(user.Id) ?? throw new UserNotFoundException();
-            if (manager.Result is not null)
-            {
-                claims.Add(new(type: "manager-id", value: manager.Result.Id.ToString()));
-            }
+            var manager = await CheckIsManagerExist(user.Id) ?? throw new UserNotFoundException();
+            claims.Add(new Claim(type: "manager-id", value: manager.Id.ToString()));
+            claims.Add(new Claim(type: "panel-id", value: manager.Panel?.Id.ToString() ?? string.Empty));
         }
 
         long expiresIn = 0;
         var token = _jwtService.GenerateToken(claims, ref expiresIn);
 
         return new RegisterResponse { Token = token };
-
     }
 
     public async Task<Customer?> CheckIsCustomerExist(int userId)
     {
         return await _customerRepository.TableNoTracking.Where(c => c.UserId == userId).SingleOrDefaultAsync();
     }
-    public async Task<Staff?> CheckIsStaffExist(int userId)
+
+    private async Task<Staff?> CheckIsStaffExist(int userId)
     {
         return await _staffRepository.TableNoTracking.Where(c => c.UserId == userId).SingleOrDefaultAsync();
     }
-    public async Task<Manager?> CheckIsManagerExist(int userId)
+
+    private async Task<Manager?> CheckIsManagerExist(int userId)
     {
-        return await _managerRepository.TableNoTracking.Where(c => c.UserId == userId).SingleOrDefaultAsync();
+        return await _managerRepository.TableNoTracking
+            .Where(c => c.UserId == userId)
+            .Include(x => x.Panel)
+            .SingleOrDefaultAsync();
     }
 
     public async Task<ProfileBriefResponse> GetBriefProfile(CancellationToken cancellationToken)
@@ -179,6 +181,7 @@ public class UserService
                 }
             }
         }
+
         return userResponse;
     }
 
@@ -186,7 +189,7 @@ public class UserService
         string field,
         UpdateFieldInput input,
         CancellationToken cancellationToken
-        )
+    )
     {
         var userId = _workContext.GetUserId();
         var userType = _workContext.GetUserType();
@@ -196,11 +199,11 @@ public class UserService
             .SingleOrDefaultAsync(cancellationToken) ?? throw new UserNotFoundException();
 
         if (!Enum.TryParse<UserUpdateField>(
-                    value: field,
-                    ignoreCase: true,
-                    result: out var updateField
-                )
+                value: field,
+                ignoreCase: true,
+                result: out var updateField
             )
+           )
         {
             throw new BadRequestException("Field not Found!");
         }

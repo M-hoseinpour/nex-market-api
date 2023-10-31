@@ -14,6 +14,8 @@ using Microsoft.OpenApi.Models;
 using market.Configuration.Swagger;
 using System.Text.Json.Serialization;
 using market.Converters;
+using market.Services.ProductService;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -97,6 +99,7 @@ builder.Services.AddSingleton<IPasswordService, PasswordService>();
 builder.Services.AddSingleton<IWorkContext, WorkContext>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<PanelService>();
+builder.Services.AddScoped<ProductService>();
 
 
 
@@ -134,7 +137,11 @@ app.UseMiddleware<HandledExceptionMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.DocExpansion(DocExpansion.None);
+        options.EnablePersistAuthorization();
+    });
 }
 
 app.UseAuthentication();

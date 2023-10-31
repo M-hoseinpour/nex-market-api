@@ -58,6 +58,21 @@ public class WorkContext : IWorkContext
         throw new BadAuthorizationTokenException();
     }
 
+    public int GetPanelId()
+    {
+        var userClaim = GetCurrentPanelIdClaim();
+
+        if (userClaim is null)
+        {
+            throw new BadAuthorizationTokenException();
+        }
+
+        if (int.TryParse(userClaim.Value, out var panelId))
+            return panelId;
+
+        throw new BadAuthorizationTokenException();
+    }
+
     public UserType GetUserType()
     {
         var userClaim = GetCurrentUserTypeClaim();
@@ -96,6 +111,12 @@ public class WorkContext : IWorkContext
     public Claim GetCurrentManagerIdClaim()
     {
         var claimType = "manager-id";
+        return GetClaim(claimType);
+    }
+    
+    public Claim GetCurrentPanelIdClaim()
+    {
+        var claimType = "panel-id";
         return GetClaim(claimType);
     }
 

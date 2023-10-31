@@ -1,16 +1,18 @@
-
 using market.Data.Repository;
 using market.Models.Domain;
 using market.Models.DTO.panel;
+using market.Models.DTO.Panel;
 using Microsoft.AspNetCore.Mvc;
+
+namespace market.Controllers;
 
 [ApiController]
 [Route("api/panels")]
-public class PanelsController : ControllerBase
+public class PanelController : ControllerBase
 {
     private readonly PanelService _panelService;
 
-    public PanelsController(PanelService panelService, IRepository<Manager> mangerRepository)
+    public PanelController(PanelService panelService, IRepository<Manager> mangerRepository)
     {
         _panelService = panelService;
     }

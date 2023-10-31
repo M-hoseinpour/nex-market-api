@@ -4,6 +4,7 @@ using market.Data.Repository;
 using market.Exceptions;
 using market.Models.Domain;
 using market.Models.DTO.panel;
+using market.Models.DTO.Panel;
 using market.Models.Enum;
 using market.SystemServices.Contracts;
 using Microsoft.EntityFrameworkCore;

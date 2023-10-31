@@ -1,5 +1,6 @@
 using AutoMapper;
-namespace market.Models.Domain;
+
+namespace market.Models.DTO.User;
 public class ProfileBriefResponse
 {
     public string? FirstName { get; set; }
@@ -18,7 +19,7 @@ public class ProfileBriefResponseMap : Profile
 {
     public ProfileBriefResponseMap()
     {
-        CreateMap<User, ProfileBriefResponse>()
+        CreateMap<Domain.User, ProfileBriefResponse>()
         .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.UserType.ToString()))
         .ForMember(dest => dest.UserState, opt => opt.MapFrom(src => src.UserState.ToString())); // Maps the enum string representation
 

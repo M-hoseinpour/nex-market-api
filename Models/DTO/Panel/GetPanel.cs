@@ -1,4 +1,3 @@
-using market.Models.Domain;
 using AutoMapper;
 
 namespace market.Models.DTO.panel;
@@ -12,6 +11,6 @@ public class GetPanelMap : Profile
 {
     public GetPanelMap()
     {
-        CreateMap<Panel, GetPanel>();
+        CreateMap<Domain.Panel, GetPanel>();
     }
 }
