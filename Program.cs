@@ -9,13 +9,17 @@ using market.Extensions;
 using Microsoft.Extensions.Options;
 using ApiFramework.Middlewares;
 using System.Reflection;
+using Amazon.S3;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.OpenApi.Models;
 using market.Configuration.Swagger;
 using System.Text.Json.Serialization;
 using market.Converters;
-using market.Services.ProductService;
 using Swashbuckle.AspNetCore.SwaggerUI;
+using market.Models.DTO.File;
+using market.Services.ProductService;
+using market.Services.FileService;
+using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,21 +89,43 @@ builder.Services
         }
     );
 
+builder.Services.AddSingleton<IAmazonS3>(
+sp =>
+{
+    var s3Config = configuration.GetSection(nameof(S3Config)).Get<S3Config>();
+    var clientConfig = new AmazonS3Config
+    {
+        AuthenticationRegion = s3Config.Region,
+        ServiceURL = s3Config.ServiceUrl,
+        ForcePathStyle = true
+    };
+    return new AmazonS3Client(
+        awsAccessKeyId: s3Config.AccessKey,
+        awsSecretAccessKey: s3Config.SecretKey,
+        clientConfig: clientConfig
+    );
+}
+);
+
 var connectionString = configuration.GetConnectionString("MainDb");
 builder.Services.AddDbContext<ApplicationDbContext>(x => x.UseNpgsql(connectionString));
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 Configure<JwtServiceSettings>(services: builder.Services, key: nameof(JwtServiceSettings));
-
+Configure<S3Config>(services: builder.Services, key: nameof(S3Config));
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
 builder.Services.AddSingleton<IJwtService, JwtService>();
 builder.Services.AddSingleton<IPasswordService, PasswordService>();
+builder.Services.AddSingleton<RandomNumberGenerator, RNGCryptoServiceProvider>();
 builder.Services.AddSingleton<IWorkContext, WorkContext>();
+builder.Services.AddSingleton<IRandomService, RandomService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<PanelService>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<FileService>();
 
 
 
