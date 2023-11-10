@@ -1,5 +1,8 @@
-using market.Models.Domain;
+using market.Models.DTO.BaseDto;
+using market.Models.DTO.Cart;
 using market.Models.DTO.User;
+using market.Services;
+using market.Services.CartService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace market.Controllers;
@@ -9,9 +12,12 @@ namespace market.Controllers;
 public class UserController : ControllerBase
 {
     private readonly UserService _userService;
-    public UserController(UserService userService)
+    private readonly CartService _cartService;
+
+    public UserController(UserService userService, CartService cartService)
     {
         _userService = userService;
+        _cartService = cartService;
     }
 
     [HttpPost("register")]
@@ -19,6 +25,7 @@ public class UserController : ControllerBase
     {
         return await _userService.RegisterUser(registerInput, cancellationToken);
     }
+
     [HttpPost("login")]
     public async Task<RegisterResponse> LoginUser(RegisterInput registerInput, CancellationToken cancellationToken)
     {
@@ -36,7 +43,7 @@ public class UserController : ControllerBase
         string field,
         UpdateFieldInput input,
         CancellationToken cancellationToken
-)
+    )
     {
         await _userService.UpdateProfileField(
             field: field,
@@ -47,10 +54,37 @@ public class UserController : ControllerBase
 
     [HttpPost("profile")]
     public async Task<ProfileBriefResponse> CompleteProfile(
-    ProfileInput input,
-    CancellationToken cancellationToken
-)
+        ProfileInput input,
+        CancellationToken cancellationToken
+    )
     {
         return await _userService.CompleteProfile(input: input, cancellationToken: cancellationToken);
+    }
+
+    [HttpPost("cart")]
+    public async Task AddToCart(
+        CartDto dto,
+        CancellationToken cancellationToken
+    )
+    {
+        await _cartService.AddToCart(dto: dto, cancellationToken: cancellationToken);
+    }
+    
+    [HttpGet("cart")]
+    public async Task<FilteredResult<CartDto>> GetCart(
+        PaginationQueryParams queryParams,
+        CancellationToken cancellationToken
+    )
+    {
+        return await _cartService.GetCart(queryParams: queryParams, cancellationToken: cancellationToken);
+    }
+    
+    [HttpDelete("cart/{id:int}")]
+    public async Task DeleteFromCart(
+        int id,
+        CancellationToken cancellationToken
+    )
+    {
+        await _cartService.DeleteFromCart(cartId: id, cancellationToken: cancellationToken);
     }
 }
