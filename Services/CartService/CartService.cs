@@ -52,7 +52,7 @@ public class CartService
 
         var cart = new CartItem
         {
-            UserId = userId,
+            CustomerId = userId,
             ProductId = dto.ProductId,
             Quantity = dto.Quantity
         };
@@ -69,7 +69,7 @@ public class CartService
 
         var cart = await _cartRepository
             .TableNoTracking
-            .Where(predicate: x => x.UserId == userId)
+            .Where(predicate: x => x.CustomerId == userId)
             .ProjectTo<CartDto>(configuration: _mapper.ConfigurationProvider)
             .ExecuteWithPaginationAsync(
                 paginationQueryParams: queryParams,
@@ -79,14 +79,14 @@ public class CartService
         return cart;
     }
 
-    public async Task DeleteFromCart(int cartId, CancellationToken cancellationToken)
+    public async Task DeleteFromCart(Guid cartGuid, CancellationToken cancellationToken)
     {
         var userId = _workContext.GetUserId();
 
         var cart = await _cartRepository
             .Table
             .FirstOrDefaultAsync(
-                predicate: x => x.Id == cartId && x.UserId == userId,
+                predicate: x => x.Uuid == cartGuid && x.CustomerId == userId,
                 cancellationToken: cancellationToken
             );
 

@@ -7,8 +7,8 @@ namespace market.Models.Domain;
 
 public class CartItem : Entity
 {
-    public int UserId { get; set; }
-    public virtual User User { get; set; } = null!;
+    public int CustomerId { get; set; }
+    public virtual Customer Customer { get; set; } = null!;
 
     public int ProductId { get; set; }
     public virtual Product Product { get; set; } = null!;
@@ -25,13 +25,13 @@ public class CartItemConfiguration : IEntityTypeConfiguration<CartItem>
         builder.HasTimestamps();
 
         builder.Property(x => x.Quantity).HasDefaultValue(1);
-        builder.Property(x => x.UserId).IsRequired();
+        builder.Property(x => x.CustomerId).IsRequired();
         builder.Property(x => x.ProductId).IsRequired();
 
         builder
-            .HasOne(x => x.User)
+            .HasOne(x => x.Customer)
             .WithMany()
-            .HasForeignKey(x => x.UserId);
+            .HasForeignKey(x => x.CustomerId);
         
         builder
             .HasOne(x => x.Product)

@@ -10,7 +10,6 @@ public class AddProductInput
     public string? Detail { get; set; }
     public decimal Price { get; set; }
     public int Quantity { get; set; }
-    public int PanelId { get; set; }
     public IList<UpdateProductTags> TagIds { get; set; } = new List<UpdateProductTags>();
 }
 

@@ -79,12 +79,12 @@ public class UserController : ControllerBase
         return await _cartService.GetCart(queryParams: queryParams, cancellationToken: cancellationToken);
     }
     
-    [HttpDelete("cart/{id:int}")]
+    [HttpDelete("cart/{id:guid}")]
     public async Task DeleteFromCart(
-        int id,
+        Guid id,
         CancellationToken cancellationToken
     )
     {
-        await _cartService.DeleteFromCart(cartId: id, cancellationToken: cancellationToken);
+        await _cartService.DeleteFromCart(cartGuid: id, cancellationToken: cancellationToken);
     }
 }

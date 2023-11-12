@@ -10,8 +10,8 @@ public class Order : Entity
 {
     public OrderStatus Status { get; set; }
     
-    public int UserId { get; set; }
-    public virtual User User { get; set; } = null!;
+    public int CustomerId { get; set; }
+    public virtual Customer Customer { get; set; } = null!;
     
     public int AddressId { get; set; }
     public virtual Address Address { get; set; } = null!;
@@ -26,14 +26,14 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.HasSoftDelete();
         builder.HasTimestamps();
 
-        builder.Property(x => x.UserId).IsRequired();
+        builder.Property(x => x.CustomerId).IsRequired();
         builder.Property(x => x.AddressId).IsRequired();
         builder.Property(x => x.Status).HasDefaultValue(OrderStatus.Pending);
         
         builder
-            .HasOne(x => x.User)
+            .HasOne(x => x.Customer)
             .WithMany()
-            .HasForeignKey(x => x.UserId);
+            .HasForeignKey(x => x.CustomerId);
         
         builder
             .HasOne(x => x.Address)
