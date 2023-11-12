@@ -9,7 +9,7 @@ public class Tag : Entity
 {
     public required string Name { get; set; }
     public int PanelId { get; set; }
-    public virtual required Panel Panel { get; set; }
+    public virtual required Panel Panel { get; set; }   
     
     public virtual required ICollection<ProductTag> ProductTags { get; set; }
 }

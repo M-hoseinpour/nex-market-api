@@ -75,18 +75,18 @@ public class ProductService
         await _productRepository.UpdateAsync(product, cancellationToken);
     }
 
-    public async Task<FilteredResult<GetAllProductsResponse>> GetAllProducts(PaginationQueryParams queryParams, CancellationToken cancellationToken)
+    public async Task<FilteredResult<GetProductShortResult>> GetAllProducts(PaginationQueryParams queryParams, CancellationToken cancellationToken)
     {
         return await _productRepository.TableNoTracking
-            .ProjectTo<GetAllProductsResponse>(_mapper.ConfigurationProvider)
+            .ProjectTo<GetProductShortResult>(_mapper.ConfigurationProvider)
             .ExecuteWithPaginationAsync(queryParams, cancellationToken);
     }
 
-    public async Task<GetProductResponse> GetProduct(int productId, CancellationToken cancellationToken)
+    public async Task<GetProductResult> GetProduct(int productId, CancellationToken cancellationToken)
     {
         var product = await _productRepository.TableNoTracking
             .Where(x => x.Id == productId)
-            .ProjectTo<GetProductResponse>(_mapper.ConfigurationProvider)
+            .ProjectTo<GetProductResult>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(cancellationToken);
 
         if (product is null)

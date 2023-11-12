@@ -5,6 +5,7 @@ namespace market.SystemServices.Contracts;
 
 public interface IWorkContext
 {
+    int GetCustomerId();
     int GetUserId();
     int GetStaffId();
     int GetManagerId();
@@ -15,5 +16,6 @@ public interface IWorkContext
     Claim GetCurrentUserTypeClaim();
     Claim GetCurrentUserIdClaim();
     Claim GetCurrentStaffIdClaim();
+    Claim GetCurrentCustomerIdClaim();
     Claim GetCurrentManagerIdClaim();
 }

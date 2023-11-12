@@ -29,7 +29,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<FilteredResult<GetAllProductsResponse>> GetAllProducts(
+    public async Task<FilteredResult<GetProductShortResult>> GetAllProducts(
         [FromQuery] PaginationQueryParams queryParams,
         CancellationToken cancellationToken
     )
@@ -38,7 +38,7 @@ public class ProductController : ControllerBase
     }
     
     [HttpGet("{id:int}")]
-    public async Task<GetProductResponse> GetProduct(
+    public async Task<GetProductResult> GetProduct(
         int id,
         CancellationToken cancellationToken
     )
