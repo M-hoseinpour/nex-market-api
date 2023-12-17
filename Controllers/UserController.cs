@@ -72,7 +72,7 @@ public class UserController : ControllerBase
     
     [HttpGet("cart")]
     public async Task<FilteredResult<CartDto>> GetCart(
-        PaginationQueryParams queryParams,
+        [FromQuery] PaginationQueryParams queryParams,
         CancellationToken cancellationToken
     )
     {
