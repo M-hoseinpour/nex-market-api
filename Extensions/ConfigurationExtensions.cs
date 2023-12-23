@@ -2,7 +2,7 @@ using market.Models.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Auctioneer.Data.Extensions
+namespace market.Extensions
 {
     public static class ConfigurationExtensions
     {

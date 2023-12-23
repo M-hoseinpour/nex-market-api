@@ -1,4 +1,4 @@
-using Auctioneer.Data.Extensions;
+using market.Extensions;
 using market.Models.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

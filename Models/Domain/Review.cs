@@ -5,37 +5,39 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace market.Models.Domain;
 
-public class CartItem : Entity
+public class Review : Entity
 {
-    public int CustomerId { get; set; }
+    public string? Comment { get; set; }
+    public required decimal Rating { get; set; }
+    
+    public required int CustomerId { get; set; }
     public virtual Customer Customer { get; set; } = null!;
-
-    public int ProductId { get; set; }
+    
+    public required int ProductId { get; set; }
     public virtual Product Product { get; set; } = null!;
-
-    public int Quantity { get; set; }
 }
 
-public class CartItemConfiguration : IEntityTypeConfiguration<CartItem>
+public class ReviewConfiguration : IEntityTypeConfiguration<Review>
 {
-    public void Configure(EntityTypeBuilder<CartItem> builder)
+    public void Configure(EntityTypeBuilder<Review> builder)
     {
         builder.HasKey(x => x.Id);
-        builder.HasSoftDelete();
         builder.HasTimestamps();
+        builder.HasSoftDelete();
 
-        builder.Property(x => x.Quantity).HasDefaultValue(1);
+        builder.Property(x => x.Rating).IsRequired();
         builder.Property(x => x.CustomerId).IsRequired();
         builder.Property(x => x.ProductId).IsRequired();
+        builder.Property(x => x.Comment);
 
         builder
             .HasOne(x => x.Customer)
-            .WithMany()
+            .WithMany(x => x.Reviews)
             .HasForeignKey(x => x.CustomerId);
         
         builder
             .HasOne(x => x.Product)
-            .WithMany()
+            .WithMany(x => x.Reviews)
             .HasForeignKey(x => x.ProductId);
     }
 }

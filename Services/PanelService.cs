@@ -18,7 +18,6 @@ public class PanelService
     private readonly IWorkContext _workContext;
     private readonly IMapper _mapper;
 
-
     public PanelService(
         IRepository<Panel> panelRepository,
         IRepository<Manager> managerRepository,
@@ -39,7 +38,9 @@ public class PanelService
     public async Task AddPanel(PanelInput panelInput, CancellationToken cancellationToken)
     {
         var manager = await GetManager(cancellationToken);
-        var panel = await _panelRepository.TableNoTracking.Where(p => p.ManagerId == manager.Id).SingleOrDefaultAsync(cancellationToken);
+        var panel = await _panelRepository.TableNoTracking
+            .Where(p => p.ManagerId == manager.Id)
+            .SingleOrDefaultAsync(cancellationToken);
         if (panel is not null)
         {
             throw new BadRequestException("manager already has panel!");
@@ -48,16 +49,28 @@ public class PanelService
         var newPanel = new Panel { ManagerId = manager.Id, Name = panelInput.Name };
         await _panelRepository.AddAsync(newPanel, cancellationToken);
     }
+
     public async Task AddStaff(AddStaffInput addStaffInput, CancellationToken cancellationToken)
     {
         var manager = await GetManager(cancellationToken);
 
-        var panel = await _panelRepository.TableNoTracking.Where(p => p.ManagerId == manager.Id).FirstOrDefaultAsync(cancellationToken) ?? throw new NotFoundException("manager does not have a panel");
+        var panel =
+            await _panelRepository.TableNoTracking
+                .Where(p => p.ManagerId == manager.Id)
+                .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException("manager does not have a panel");
 
-        var user = await _userRepository.TableNoTracking
-            .FirstOrDefaultAsync(u => u.Email == addStaffInput.Email && u.UserType == UserType.Staff, cancellationToken) ?? throw new NotFoundException("staff not found!");
+        var user =
+            await _userRepository.TableNoTracking.FirstOrDefaultAsync(
+                u => u.Email == addStaffInput.Email && u.UserType == UserType.Staff,
+                cancellationToken
+            ) ?? throw new NotFoundException("staff not found!");
 
-        var staff = await _staffRepository.TableNoTracking.Where(s => s.UserId == user.Id).SingleOrDefaultAsync(cancellationToken) ?? throw new NotFoundException("staff not found!");
+        var staff =
+            await _staffRepository.TableNoTracking
+                .Where(s => s.UserId == user.Id)
+                .SingleOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException("staff not found!");
 
         if (staff.PanelId is not null)
         {
@@ -73,18 +86,24 @@ public class PanelService
     {
         var userId = _workContext.GetUserId();
         var userType = _workContext.GetUserType();
-        if (UserType.Manager != userType) throw new BadIdentityException("user is not manger!");
-        return await _managerRepository.TableNoTracking.Where(u => u.UserId == userId).SingleOrDefaultAsync(cancellationToken) ?? throw new NotFoundException("manager is not found!");
+        if (UserType.Manager != userType)
+            throw new BadIdentityException("user is not manger!");
+        return await _managerRepository.TableNoTracking
+                .Where(u => u.UserId == userId)
+                .SingleOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException("manager is not found!");
     }
 
-    public async Task<GetPanel> GetPanel(Guid panelGuid, CancellationToken cancellationToken)
+    public async Task<GetPanel> GetPanel(CancellationToken cancellationToken)
     {
-        var userPanel = await GetUserPanel() ?? throw new NotFoundException("user does Not have a panel!");
-        var panel = await _panelRepository.TableNoTracking.Where(p => p.Uuid == panelGuid).SingleOrDefaultAsync(cancellationToken) ?? throw new NotFoundException("panel not found!");
-        if (panel.Id != userPanel.Id)
-        {
-            throw new NotFoundException("panel not found!");
-        }
+        var panelId = _workContext.GetPanelId();
+
+        var panel =
+            await _panelRepository.TableNoTracking
+                .Where(p => p.Id == panelId)
+                .SingleOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException("panel not found!");
+
         return _mapper.Map<GetPanel>(panel);
     }
 
@@ -96,30 +115,45 @@ public class PanelService
         if (UserType.Staff == userType)
         {
             var staffId = _workContext.GetStaffId();
-            var staff = await _staffRepository.TableNoTracking.Where(S => S.Id == staffId).Include(m => m.Panel).SingleOrDefaultAsync() ?? throw new UserNotFoundException();
-            if (staff.Panel is not null) return staff.Panel;
-
+            var staff =
+                await _staffRepository.TableNoTracking
+                    .Where(S => S.Id == staffId)
+                    .Include(m => m.Panel)
+                    .SingleOrDefaultAsync() ?? throw new UserNotFoundException();
+            if (staff.Panel is not null)
+                return staff.Panel;
         }
 
         if (UserType.Manager == userType)
         {
             var managerId = _workContext.GetManagerId();
-            var manager = await _managerRepository.TableNoTracking.Where(S => S.Id == managerId).Include(m => m.Panel).SingleOrDefaultAsync() ?? throw new UserNotFoundException();
-            if (manager.Panel is not null) return manager.Panel;
+            var manager =
+                await _managerRepository.TableNoTracking
+                    .Where(S => S.Id == managerId)
+                    .Include(m => m.Panel)
+                    .SingleOrDefaultAsync() ?? throw new UserNotFoundException();
+            if (manager.Panel is not null)
+                return manager.Panel;
         }
         return null;
     }
 
-    public async Task<IList<PanelMember>?> GetPanelMembers(Guid panelGuid, CancellationToken cancellationToken)
+    public async Task<IList<PanelMember>?> GetPanelMembers(
+        Guid panelGuid,
+        CancellationToken cancellationToken
+    )
     {
-        var userPanel = await GetUserPanel() ?? throw new NotFoundException("user does Not have a panel!");
-        var panel = await _panelRepository.TableNoTracking
-                                .Where(p => p.Uuid == panelGuid)
-                                .Include(p => p.Staffs)
-                                .ThenInclude(s => s.User)
-                                .Include(p => p.Manager)
-                                .ThenInclude(m => m.User)
-                                .SingleOrDefaultAsync(cancellationToken) ?? throw new NotFoundException("panel not found!");
+        var userPanel =
+            await GetUserPanel() ?? throw new NotFoundException("user does Not have a panel!");
+        var panel =
+            await _panelRepository.TableNoTracking
+                .Where(p => p.Uuid == panelGuid)
+                .Include(p => p.Staffs)
+                .ThenInclude(s => s.User)
+                .Include(p => p.Manager)
+                .ThenInclude(m => m.User)
+                .SingleOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException("panel not found!");
 
         if (userPanel.Id != panel.Id)
         {

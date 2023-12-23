@@ -1,4 +1,4 @@
-using Auctioneer.Data.Extensions;
+using market.Extensions;
 using market.Models.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -10,6 +10,7 @@ public class Customer : Entity
     public int UserId { get; set; }
     public virtual required User User { get; set; }
     public virtual required ICollection<Address> Addresses { get; set; }
+    public virtual ICollection<Review>? Reviews { get; set; }
 }
 
 public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
