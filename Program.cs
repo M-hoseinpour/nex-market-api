@@ -20,6 +20,8 @@ using market.Models.DTO.File;
 using market.Services.ProductService;
 using market.Services.FileService;
 using System.Security.Cryptography;
+using market.Services;
+using market.Services.BrandService;
 using market.Services.CartService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -128,6 +130,9 @@ builder.Services.AddScoped<PanelService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<FileService>();
 builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<BrandService>();
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<ReviewService>();
 
 
 

@@ -1,4 +1,4 @@
-using Auctioneer.Data.Extensions;
+using market.Extensions;
 using market.Models.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -9,10 +9,10 @@ public class Category : Entity
 {
     public required string Name { get; set; }
     public int PanelId { get; set; }
-    public virtual required Panel Panel { get; set; }
+    public virtual Panel Panel { get; set; } = null!;
     public int? ParentCategoryId { get; set; }
-    public virtual required Category ParentCategory { get; set; }
-    public virtual required ICollection<Category> ChildCategories { get; set; }
+    public virtual Category? ParentCategory { get; set; }
+    public virtual ICollection<Category>? ChildCategories { get; set; }
 }
 
 public class CategoryConfiguration : IEntityTypeConfiguration<Category>

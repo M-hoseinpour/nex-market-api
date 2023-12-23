@@ -1,17 +1,19 @@
-using Auctioneer.Data.Extensions;
+using market.Extensions;
 using market.Models.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using File = market.Data.Domain.File;
 
 namespace market.Models.Domain;
 
 public class Brand : Entity
 {
     public required string Name { get; set; }
-    public int PanelId { get; set; }
-    public virtual required Panel Panel { get; set; }
-    
-    //todo after adding file system we should add logo file Id here
+    public required int PanelId { get; set; }
+    public virtual Panel Panel { get; set; } = null!;
+
+    public Guid? LogoFileId { get; set; }
+    public virtual File? LogoFile { get; set; }
 }
 
 public class BrandConfiguration : IEntityTypeConfiguration<Brand>
@@ -30,5 +32,10 @@ public class BrandConfiguration : IEntityTypeConfiguration<Brand>
             .HasOne(x => x.Panel)
             .WithMany()
             .HasForeignKey(x => x.PanelId);
+        
+        builder
+            .HasOne(x => x.LogoFile)
+            .WithOne()
+            .HasForeignKey<Brand>(x => x.LogoFileId);
     }
 }

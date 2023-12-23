@@ -4,18 +4,19 @@ using market.Models.Enum;
 
 namespace market.Models.DTO.Product;
 
-public class GetProductResult : GetProductShortResult
+public class GetPanelProductResult : GetPanelAllProductsResult
 {
     public string? Description { get; set; }
     public string? Detail { get; set; }
     public IList<FileDto>? Images { get; set; }
+
 }
 
-public class GetProductResponseMap : Profile
+public class GetProductResultByAdminMap : Profile
 {
-    public GetProductResponseMap()
+    public GetProductResultByAdminMap()
     {
-        CreateMap<Domain.Product, GetProductResult>()
+        CreateMap<Domain.Product, GetPanelProductResult>()
             .ForMember(
                 des => des.Tags,
                 opt => opt.MapFrom(src => src.ProductTags.Select(x => x.Tag))
