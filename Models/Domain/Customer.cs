@@ -11,6 +11,8 @@ public class Customer : Entity
     public virtual required User User { get; set; }
     public virtual required ICollection<Address> Addresses { get; set; }
     public virtual ICollection<Review>? Reviews { get; set; }
+    public virtual FinancialAccount FinancialAccount { get; set; }
+    public virtual ICollection<BankTransaction> BankTransactions { get; set; }
 }
 
 public class CustomerConfiguration : IEntityTypeConfiguration<Customer>

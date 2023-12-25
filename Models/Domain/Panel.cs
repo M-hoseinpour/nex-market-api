@@ -11,6 +11,7 @@ public class Panel : Entity
     public int ManagerId { get; set; }
     public virtual Manager? Manager { get; set; }
     public virtual ICollection<Staff>? Staffs { get; set; }
+    public virtual FinancialAccount FinancialAccount { get; set; }
 }
 
 public class PanelConfiguration : IEntityTypeConfiguration<Panel>

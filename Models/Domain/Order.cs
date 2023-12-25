@@ -16,8 +16,8 @@ public class Order : Entity
     public int AddressId { get; set; }
     public virtual Address Address { get; set; } = null!;
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = null!;
-    public int? FinancialTransactionId { get; set; }
-    public virtual FinancialTransaction? FinancialTransaction { get; set; }
+    public int? FinancialDocumentId { get; set; }
+    public virtual FinancialDocument? FinancialDocument { get; set; }
 }
 
 public class OrderConfiguration : IEntityTypeConfiguration<Order>
@@ -43,8 +43,8 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasForeignKey(x => x.AddressId);
 
         builder
-         .HasOne(x => x.FinancialTransaction)
+         .HasOne(x => x.FinancialDocument)
          .WithOne(x => x.Order)
-         .HasForeignKey<Order>(x => x.FinancialTransactionId);
+         .HasForeignKey<Order>(x => x.FinancialDocumentId);
     }
 }
