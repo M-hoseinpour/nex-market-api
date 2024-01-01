@@ -36,52 +36,6 @@ public class OrderService
         _cartItemRepository = cartItemRepository;
         _mapper = mapper;
     }
-
-    public async Task AddOrder(AddOrderInput input, CancellationToken cancellationToken)
-    {
-        var customerId = _workContext.GetCustomerId();
-
-        var address = await _addressRepository.TableNoTracking.FirstOrDefaultAsync(
-            x => x.Id == input.AddressId,
-            cancellationToken
-        );
-
-        if (address is null || address.CustomerId != customerId)
-            throw new BadRequestException();
-
-        var products = await _productRepository.TableNoTracking
-            .Where(x => input.OrderDetails.Select(a => a.ProductId).Contains(x.Id))
-            .ToListAsync(cancellationToken);
-
-        var order = new Order
-        {
-            CustomerId = customerId,
-            AddressId = input.AddressId,
-            Status = OrderStatus.Pending,
-            OrderDetails = new List<OrderDetail>()
-        };
-
-        foreach (var orderDetail in input.OrderDetails)
-        {
-            order.OrderDetails.Add(
-                new OrderDetail
-                {
-                    Quantity = orderDetail.Quantity,
-                    ProductId = orderDetail.ProductId,
-                    Price = products.Single(x => x.Id == orderDetail.ProductId).Price
-                }
-            );
-        }
-
-        await _orderRepository.AddAsync(order, cancellationToken);
-
-        var cartItems = await _cartItemRepository.Table
-            .Where(x => x.CustomerId == customerId)
-            .ToListAsync(cancellationToken);
-
-        await _cartItemRepository.DeleteRangeAsync(cartItems, cancellationToken);
-    }
-
     public async Task<FilteredResult<GetOrderShortResult>> GetOrders(
         GetOrdersQueryParams queryParams,
         CancellationToken cancellationToken

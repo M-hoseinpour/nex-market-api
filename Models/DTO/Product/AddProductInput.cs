@@ -15,6 +15,8 @@ public class AddProductInput
     public Guid BrandGuid { get; set; }
     public Guid CategoryGuid { get; set; }
     public IList<Guid> TagIds { get; set; } = new List<Guid>();
+    public bool IsDiscount { get; set; }
+    public decimal? DiscountPercent { get; set; }
     
     public IList<ProductImageInput>? ProductImages { get; set; }
 }

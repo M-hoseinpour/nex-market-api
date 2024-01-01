@@ -148,6 +148,7 @@ public class ProductService
         product.Status = input.Status;
         product.BrandId = brand.Id;
         product.CategoryId = category.Id;
+        product.DiscountPrice = input.DiscountPrice;
 
         foreach (var tagId in input.TagIds)
         {
@@ -180,12 +181,33 @@ public class ProductService
     }
 
     public async Task<FilteredResult<GetProductShortResult>> GetAllProductsByCustomers(
-        PaginationQueryParams queryParams,
+        GetAllProductsQueryParams queryParams,
         CancellationToken cancellationToken
     )
     {
-        var products = await _productRepository.TableNoTracking
-            .Where(x => x.Status == ProductStatus.Purchasable)
+        var productQuery = _productRepository.TableNoTracking.Where(
+            x => x.Status == ProductStatus.Purchasable
+        );
+
+        if (queryParams.CategoryId.HasValue)
+            productQuery = productQuery.Where(x => x.CategoryId == queryParams.CategoryId);
+
+        if (queryParams.BrandId.HasValue)
+            productQuery = productQuery.Where(x => x.BrandId == queryParams.BrandId);
+
+        if (queryParams.IsDiscount)
+            productQuery = productQuery.Where(x => x.DiscountPrice  != null);
+
+        productQuery = queryParams.Order switch
+        {
+            GetAllProductsOrder.Newest => productQuery.OrderByDescending(x => x.CreateMoment),
+            GetAllProductsOrder.Cheapest => productQuery.OrderBy(x => x.Price),
+            GetAllProductsOrder.Discounted
+                => productQuery.OrderBy(x => x.DiscountPrice != null),
+            _ => productQuery
+        };
+
+        var products = await productQuery
             .ProjectTo<GetProductShortResult>(_mapper.ConfigurationProvider)
             .ExecuteWithPaginationAsync(queryParams, cancellationToken);
 
@@ -226,7 +248,6 @@ public class ProductService
                 image.Url = (await _fileService.GetFileUrl(image.FileId, cancellationToken)).Url;
             }
         }
-            
 
         return product;
     }
@@ -239,7 +260,7 @@ public class ProductService
         var products = await _productRepository.TableNoTracking
             .ProjectTo<GetPanelAllProductsResult>(_mapper.ConfigurationProvider)
             .ExecuteWithPaginationAsync(queryParams, cancellationToken);
-        
+
         foreach (var product in products.Data)
         {
             if (product.Cover is null)
@@ -264,7 +285,7 @@ public class ProductService
 
         if (product is null)
             throw new ProductNotFoundException();
-        
+
         if (product.Cover is not null)
             product.Cover.Url = (
                 await _fileService.GetFileUrl(product.Cover.FileId, cancellationToken)

@@ -18,7 +18,11 @@ public class CategoryService
     private readonly IRepository<Category> _categoryRepository;
     private readonly IMapper _mapper;
 
-    public CategoryService(IWorkContext workContext, IRepository<Category> categoryRepository, IMapper mapper)
+    public CategoryService(
+        IWorkContext workContext,
+        IRepository<Category> categoryRepository,
+        IMapper mapper
+    )
     {
         _workContext = workContext;
         _categoryRepository = categoryRepository;
@@ -33,8 +37,10 @@ public class CategoryService
 
         if (input.ParentUuid.HasValue)
         {
-            var parentCategory = await _categoryRepository.TableNoTracking
-                .SingleOrDefaultAsync(x => x.Uuid == input.ParentUuid, cancellationToken);
+            var parentCategory = await _categoryRepository.TableNoTracking.SingleOrDefaultAsync(
+                x => x.Uuid == input.ParentUuid,
+                cancellationToken
+            );
 
             if (parentCategory is null)
                 throw new NotFoundException();
@@ -45,28 +51,36 @@ public class CategoryService
         await _categoryRepository.AddAsync(category, cancellationToken);
     }
 
-    public async Task<FilteredResult<CategoryResult>> GetCategories(GetCategoriesQueryParams queryParams, CancellationToken cancellationToken)
+    public async Task<FilteredResult<CategoryResult>> GetCategories(
+        GetCategoriesQueryParams queryParams,
+        CancellationToken cancellationToken,
+        bool isAllCategories = false
+    )
     {
-        var panelId = _workContext.GetPanelId();
 
-        var categoryQuery = _categoryRepository.TableNoTracking
-            .Where(x => x.PanelId == panelId);
+        var categoryQuery = _categoryRepository.TableNoTracking;
+
+        if (isAllCategories)
+        {
+            var panelId = _workContext.GetPanelId();    
+            categoryQuery = categoryQuery.Where(x => x.PanelId == panelId);   
+        }
 
         if (queryParams.OnlyParentCategories.HasValue)
             categoryQuery = categoryQuery.Where(x => x.ParentCategoryId == null);
 
         if (queryParams.ParentCategoryUuid.HasValue)
         {
-            var parentCategory = await _categoryRepository.TableNoTracking
-                .SingleOrDefaultAsync(x => x.Uuid == queryParams.ParentCategoryUuid, cancellationToken);
+            var parentCategory = await _categoryRepository.TableNoTracking.SingleOrDefaultAsync(
+                x => x.Uuid == queryParams.ParentCategoryUuid,
+                cancellationToken
+            );
 
             if (parentCategory is null)
                 throw new NotFoundException();
 
             categoryQuery = categoryQuery.Where(x => x.ParentCategoryId == parentCategory.Id);
         }
-
-        var a = await categoryQuery.Include(x => x.ParentCategory).ToListAsync(cancellationToken);
 
         var categories = await categoryQuery
             .ProjectTo<CategoryResult>(_mapper.ConfigurationProvider)

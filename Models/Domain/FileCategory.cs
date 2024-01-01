@@ -21,5 +21,25 @@ public class FileCategoryConfiguration : IEntityTypeConfiguration<FileCategory>
         builder.Property(x => x.Title).IsRequired();
         builder.Property(x => x.Description);
         builder.Property(x => x.SubDirectory);
+
+        builder.HasData(new List<FileCategory>
+        {
+            new()
+            {
+                Id = 1,
+                Title = "Pictures",
+                Description = "All The public pictures, can be hosted in cdn",
+                SubDirectory = "pictures"
+            },
+            new()
+            {
+                Id = 2,
+                Title = "Documents",
+                Description =
+                    "All kind of documents, like identity or ownership documents. "
+                    + "This files are private all the time",
+                SubDirectory = "documents"
+            }
+        });
     }
 }

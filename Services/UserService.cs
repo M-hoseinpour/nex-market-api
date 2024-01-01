@@ -8,7 +8,10 @@ using market.Exceptions;
 using market.Services.UserService.Exceptions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using market.Extensions;
+using market.Models.DTO.BaseDto;
 using market.Models.Enum;
+using market.Services.FileService;
 using Microsoft.IdentityModel.Tokens;
 
 public class UserService
@@ -22,6 +25,7 @@ public class UserService
     private readonly IJwtService _jwtService;
     private readonly IWorkContext _workContext;
     private readonly IMapper _mapper;
+    private readonly FileService _fileService;
 
 
     public UserService(
@@ -33,8 +37,7 @@ public class UserService
         IPasswordService passwordService,
         IJwtService jwtService,
         IWorkContext workContext,
-        IMapper mapper
-    )
+        IMapper mapper, FileService fileService)
     {
         _userRepository = userRepository;
         _customerRepository = customerRepository;
@@ -45,6 +48,7 @@ public class UserService
         _jwtService = jwtService;
         _workContext = workContext;
         _mapper = mapper;
+        _fileService = fileService;
     }
 
     public async Task<RegisterResponse> RegisterUser(RegisterInput input, CancellationToken cancellationToken)
@@ -155,9 +159,16 @@ public class UserService
 
         var user = await _userRepository.Table
             .Where(x => x.Id == userId && x.UserType == userType)
+            .Include(x => x.AvatarFile)
             .SingleOrDefaultAsync(cancellationToken) ?? throw new UserNotFoundException();
 
         var userResponse = _mapper.Map<ProfileBriefResponse>(user);
+
+        if (userResponse.AvatarFile is not null)
+        {
+            var fileUrl = await _fileService.GetFileUrl(userResponse.AvatarFile.FileId, cancellationToken);
+            userResponse.AvatarFile.Url = fileUrl.Url;
+        }
 
         if (user.UserType == UserType.Staff)
         {
@@ -171,7 +182,7 @@ public class UserService
 
         if (user.UserType == UserType.Manager)
         {
-            var manager = await _managerRepository.TableNoTracking.Where(c => c.UserId == userId).Include(m => m.Panel).SingleOrDefaultAsync() ?? throw new UserNotFoundException();
+            var manager = await _managerRepository.TableNoTracking.Where(c => c.UserId == userId).Include(m => m.Panel).SingleOrDefaultAsync(cancellationToken) ?? throw new UserNotFoundException();
             if (manager.Panel is not null)
             {
                 var panel = await _panelRepository.TableNoTracking.SingleOrDefaultAsync(x => x.Id == manager.Panel.Id, cancellationToken);
@@ -219,9 +230,6 @@ public class UserService
             case UserUpdateField.MobileNumber:
                 user.MobileNumber = input.FieldValue;
                 break;
-            case UserUpdateField.AvatarLogo:
-                user.AvatarLogo = input.FieldValue;
-                break;
             case UserUpdateField.Setting:
                 user.Setting = input.FieldValue;
                 break;
@@ -234,6 +242,9 @@ public class UserService
 
     public async Task<ProfileBriefResponse> CompleteProfile(ProfileInput input, CancellationToken cancellationToken)
     {
+        if (input.FirstName.IsNullOrEmpty() || input.LastName.IsNullOrEmpty() || input.MobileNumber.IsNullOrEmpty())
+            throw new BadRequestException();
+        
         var userId = _workContext.GetUserId();
         var userType = _workContext.GetUserType();
 
@@ -244,13 +255,28 @@ public class UserService
         currentUser.FirstName = input.FirstName;
         currentUser.LastName = input.LastName;
         currentUser.MobileNumber = input.MobileNumber;
-        currentUser.AvatarLogo = input.AvatarLogo;
-
-        if (input.FirstName.IsNullOrEmpty() || input.LastName.IsNullOrEmpty() || input.MobileNumber.IsNullOrEmpty())
-            throw new BadRequestException();
+        currentUser.AvatarFileId = input.AvatarFileId;
 
         await _userRepository.UpdateAsync(currentUser, cancellationToken);
 
         return _mapper.Map<ProfileBriefResponse>(currentUser);
+    }
+
+    public async Task<FilteredResult<ProfileBriefResponse>> GetUsers(GetUsersQueryParams queryParams, CancellationToken cancellationToken)
+    {
+        var userQuery = _userRepository.TableNoTracking;
+
+        if (queryParams.Uuid.HasValue)
+            userQuery = userQuery.Where(x => x.Uuid == queryParams.Uuid);
+        
+        if (queryParams.Role.HasValue)
+            userQuery = userQuery.Where(x => x.UserType == queryParams.Role);
+
+        var users = await userQuery
+            .OrderByDescending(x => x.CreateMoment)
+            .ProjectTo<ProfileBriefResponse>(_mapper.ConfigurationProvider)
+            .ExecuteWithPaginationAsync(queryParams, cancellationToken);
+
+        return users;
     }
 }

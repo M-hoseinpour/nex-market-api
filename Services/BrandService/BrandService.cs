@@ -43,20 +43,26 @@ public class BrandService
 
     public async Task<FilteredResult<BrandResult>> GetBrands(
         PaginationQueryParams queryParams,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        bool isAllBrands = false
     )
     {
-        var panelId = _workContext.GetPanelId();
+        var brandQuery = _brandRepository.TableNoTracking;
 
-        var brands = await _brandRepository.TableNoTracking
-            .Where(x => x.PanelId == panelId)
+        if (isAllBrands)
+        {
+            var panelId = _workContext.GetPanelId();
+            brandQuery = brandQuery.Where(x => x.PanelId == panelId);
+        }
+
+        var brands = await brandQuery
             .ProjectTo<BrandResult>(_mapper.ConfigurationProvider)
             .ExecuteWithPaginationAsync(queryParams, cancellationToken);
 
         foreach (var brand in brands.Data)
         {
             if (brand.LogoFile is null) continue;
-            
+
             var url = await _fileService.GetFileUrl(brand.LogoFile.FileId, cancellationToken);
 
             brand.LogoFile.Url = url.Url;

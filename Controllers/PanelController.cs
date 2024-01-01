@@ -1,3 +1,5 @@
+using market.Models.Domain;
+using market.Models.DTO.Banner;
 using market.Models.DTO.BaseDto;
 using market.Models.DTO.Brand;
 using market.Models.DTO.Category;
@@ -19,18 +21,19 @@ public class PanelController : ControllerBase
     private readonly ProductService _productService;
     private readonly BrandService _brandService;
     private readonly CategoryService _categoryService;
+    private readonly BannerService _bannerService;
 
     public PanelController(
         PanelService panelService,
         ProductService productService,
         BrandService brandService,
-        CategoryService categoryService
-    )
+        CategoryService categoryService, BannerService bannerService)
     {
         _panelService = panelService;
         _productService = productService;
         _brandService = brandService;
         _categoryService = categoryService;
+        _bannerService = bannerService;
     }
 
     [HttpPost]
@@ -145,5 +148,20 @@ public class PanelController : ControllerBase
             queryParams: queryParams,
             cancellationToken: cancellationToken
         );
+    }
+    
+    [HttpPost("banners")]
+    public async Task AddBanner(BannerInput input, CancellationToken cancellationToken)
+    {
+        await _bannerService.AddBanner(input: input, cancellationToken: cancellationToken);
+    }
+
+    [HttpGet("banners")]
+    public async Task<FilteredResult<BannerResult>> GetBanners(
+        [FromQuery] PaginationQueryParams queryParams,
+        CancellationToken cancellationToken
+    )
+    {
+        return await _bannerService.GetBanners(queryParams: queryParams, cancellationToken: cancellationToken);
     }
 }

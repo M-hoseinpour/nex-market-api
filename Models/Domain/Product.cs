@@ -15,6 +15,7 @@ public class Product : Entity
     public int Quantity { get; set; }
     public decimal? Rating  { get; set; }
     public ProductStatus Status { get; set; }
+    public decimal? DiscountPrice { get; set; }
     public int PanelId { get; set; }
     public virtual required Panel Panel { get; set; }
     public int BrandId { get; set; }
@@ -44,6 +45,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(x => x.Rating);
         builder.Property(x => x.Status).HasDefaultValue(ProductStatus.Ordered);
         builder.Property(x => x.PanelId).IsRequired();
+        builder.Property(x => x.DiscountPrice);
 
         builder
             .HasOne(x => x.Panel)

@@ -15,13 +15,6 @@ public class OrderController : ControllerBase
     {
         _orderService = orderService;
     }
-
-    [HttpPost]
-    public async Task AddOrder(AddOrderInput input, CancellationToken cancellationToken)
-    {
-        await _orderService.AddOrder(input: input, cancellationToken: cancellationToken);
-    }
-
     [HttpGet]
     public async Task<FilteredResult<GetOrderShortResult>> GetOrders(
         [FromQuery] GetOrdersQueryParams queryParams,

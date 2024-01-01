@@ -87,4 +87,22 @@ public class UserController : ControllerBase
     {
         await _cartService.DeleteFromCart(cartGuid: id, cancellationToken: cancellationToken);
     }
+    
+    [HttpPost("cart/submit")]
+    public async Task SubmitCart(
+        SubmitCartInput input,
+        CancellationToken cancellationToken
+    )
+    {
+        await _cartService.SubmitCart(input: input, cancellationToken: cancellationToken);
+    }
+    
+    [HttpGet]
+    public async Task<FilteredResult<ProfileBriefResponse>> GetUsers(
+        [FromQuery] GetUsersQueryParams queryParams,
+        CancellationToken cancellationToken
+    )
+    {
+        return await _userService.GetUsers(queryParams: queryParams, cancellationToken: cancellationToken);
+    }
 }

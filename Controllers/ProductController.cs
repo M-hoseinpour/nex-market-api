@@ -23,7 +23,7 @@ public class ProductController : ControllerBase
 
     [HttpGet]
     public async Task<FilteredResult<GetProductShortResult>> GetAllProducts(
-        [FromQuery] PaginationQueryParams queryParams,
+        [FromQuery] GetAllProductsQueryParams queryParams,
         CancellationToken cancellationToken
     )
     {
@@ -33,34 +33,34 @@ public class ProductController : ControllerBase
         );
     }
 
-    [HttpGet(template: "{uuid:guid}")]
-    public async Task<GetProductResult> GetProduct(Guid uuid, CancellationToken cancellationToken)
+    [HttpGet(template: "{id:guid}")]
+    public async Task<GetProductResult> GetProduct(Guid id, CancellationToken cancellationToken)
     {
         return await _productService.GetProductByCustomer(
-            productGuid: uuid,
+            productGuid: id,
             cancellationToken: cancellationToken
         );
     }
 
-    [HttpPost("{uuid:guid}/reviews")]
-    public async Task AddReview(Guid uuid, ReviewInput input, CancellationToken cancellationToken)
+    [HttpPost("{id:guid}/reviews")]
+    public async Task AddReview(Guid id, ReviewInput input, CancellationToken cancellationToken)
     {
         await _reviewService.AddReview(
-            productGuid: uuid,
+            productGuid: id,
             input: input,
             cancellationToken: cancellationToken
         );
     }
 
-    [HttpGet("{uuid:guid}/reviews")]
+    [HttpGet("{id:guid}/reviews")]
     public async Task<FilteredResult<ReviewResult>> GetReviews(
-        Guid uuid,
+        Guid id,
         PaginationQueryParams queryParams,
         CancellationToken cancellationToken
     )
     {
         return await _reviewService.GetReviews(
-            productGuid: uuid,
+            productGuid: id,
             queryParams: queryParams,
             cancellationToken: cancellationToken
         );

@@ -10,7 +10,9 @@ public class Banner : Entity
 {
     public required string Title { get; set; }
     public Guid FileId { get; set; }
-    public virtual required File File { get; set; }
+    public virtual File File { get; set; } = null!;
+    public int PanelId { get; set; }
+    public virtual Panel Panel { get; set; } = null!;
 }
 
 public class BannerConfiguration : IEntityTypeConfiguration<Banner>
@@ -23,10 +25,17 @@ public class BannerConfiguration : IEntityTypeConfiguration<Banner>
 
         builder.Property(x => x.Title).IsRequired();
         builder.Property(x => x.FileId).IsRequired();
+        builder.Property(x => x.PanelId).IsRequired();
+
 
         builder
             .HasOne(x => x.File)
             .WithOne()
             .HasForeignKey<Banner>(x => x.FileId);
+        
+        builder
+            .HasOne(x => x.Panel)
+            .WithMany()
+            .HasForeignKey(x => x.PanelId);
     }
 }
