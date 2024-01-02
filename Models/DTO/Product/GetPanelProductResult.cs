@@ -8,8 +8,7 @@ public class GetPanelProductResult : GetPanelAllProductsResult
 {
     public string? Description { get; set; }
     public string? Detail { get; set; }
-    public IList<FileDto>? Images { get; set; }
-
+    public IList<FileDto>? GalleryImages { get; set; }
 }
 
 public class GetProductResultByAdminMap : Profile
@@ -28,17 +27,9 @@ public class GetProductResultByAdminMap : Profile
                         src =>
                             src.Images == null
                                 ? null
-                                : src.Images.FirstOrDefault(x => x.Type == ProductImageType.Cover)
-                    )
-            )
-            .ForMember(
-                des => des.Images,
-                opt =>
-                    opt.MapFrom(
-                        src =>
-                            src.Images == null
-                                ? null
-                                : src.Images.Where(x => x.Type == ProductImageType.Gallery).ToList()
+                                : src.Images.FirstOrDefault(x => x.Type == ProductImageType.Cover) == null
+                                    ? null
+                                    : src.Images.FirstOrDefault(x => x.Type == ProductImageType.Cover).File
                     )
             );
     }

@@ -5,11 +5,13 @@ using market.Exceptions;
 using market.Extensions;
 using market.Models.Domain;
 using market.Models.DTO.BaseDto;
+using market.Models.DTO.File;
 using market.Models.DTO.Product;
 using market.Models.Enum;
 using market.Services.ProductService.Exceptions;
 using market.SystemServices.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace market.Services.ProductService;
 
@@ -23,6 +25,7 @@ public class ProductService
     private readonly IRepository<Category> _categoryRepository;
     private readonly IWorkContext _workContext;
     private readonly FileService.FileService _fileService;
+    private readonly IRepository<ProductImage> _productImageRepository;
 
     public ProductService(
         IMapper mapper,
@@ -32,8 +35,7 @@ public class ProductService
         IRepository<Tag> tagRepository,
         IRepository<Category> categoryRepository,
         IRepository<Brand> brandRepository,
-        FileService.FileService fileService
-    )
+        FileService.FileService fileService, IRepository<ProductImage> productImageRepository)
     {
         _mapper = mapper;
         _productRepository = productRepository;
@@ -43,6 +45,7 @@ public class ProductService
         _categoryRepository = categoryRepository;
         _brandRepository = brandRepository;
         _fileService = fileService;
+        _productImageRepository = productImageRepository;
     }
 
     public async Task AddProduct(AddProductInput input, CancellationToken cancellationToken)
@@ -196,7 +199,7 @@ public class ProductService
             productQuery = productQuery.Where(x => x.BrandId == queryParams.BrandId);
 
         if (queryParams.IsDiscount)
-            productQuery = productQuery.Where(x => x.DiscountPrice  != null);
+            productQuery = productQuery.Where(x => x.DiscountPrice != null);
 
         productQuery = queryParams.Order switch
         {
@@ -230,26 +233,35 @@ public class ProductService
     {
         var product = await _productRepository.TableNoTracking
             .Where(x => x.Uuid == productGuid && x.Status == ProductStatus.Purchasable)
-            .ProjectTo<GetProductResult>(_mapper.ConfigurationProvider)
+            .Include(x => x.Images)!
+            .ThenInclude(x => x.File)
+            .Include(x => x.ProductTags)
             .SingleOrDefaultAsync(cancellationToken);
 
         if (product is null)
             throw new ProductNotFoundException();
 
-        if (product.Cover is not null)
-            product.Cover.Url = (
-                await _fileService.GetFileUrl(product.Cover.FileId, cancellationToken)
+        var galleryFiles = product.Images?.Where(x => x.Type == ProductImageType.Gallery).Select(x => x.File).ToList();
+
+        var result = _mapper.Map<GetProductResult>(product);
+
+        if (galleryFiles.IsNullOrEmpty() is false)
+            result.GalleryImages = _mapper.Map<IList<FileDto>>(galleryFiles);
+
+        if (result.Cover is not null)
+            result.Cover.Url = (
+                await _fileService.GetFileUrl(result.Cover.FileId, cancellationToken)
             ).Url;
 
-        if (product.Images is not null)
+        if (result.GalleryImages is not null)
         {
-            foreach (var image in product.Images)
+            foreach (var image in result.GalleryImages)
             {
                 image.Url = (await _fileService.GetFileUrl(image.FileId, cancellationToken)).Url;
             }
         }
 
-        return product;
+        return result;
     }
 
     public async Task<FilteredResult<GetPanelAllProductsResult>> GetPanelAllProducts(
@@ -280,25 +292,34 @@ public class ProductService
     {
         var product = await _productRepository.TableNoTracking
             .Where(x => x.Uuid == productGuid)
-            .ProjectTo<GetPanelProductResult>(_mapper.ConfigurationProvider)
+            .Include(x => x.Images)!
+            .ThenInclude(x => x.File)
+            .Include(x => x.ProductTags)
             .SingleOrDefaultAsync(cancellationToken);
 
         if (product is null)
             throw new ProductNotFoundException();
 
-        if (product.Cover is not null)
-            product.Cover.Url = (
-                await _fileService.GetFileUrl(product.Cover.FileId, cancellationToken)
+        var galleryFiles = product.Images?.Where(x => x.Type == ProductImageType.Gallery).Select(x => x.File).ToList();
+
+        var result = _mapper.Map<GetPanelProductResult>(product);
+
+        if (galleryFiles.IsNullOrEmpty() is false)
+            result.GalleryImages = _mapper.Map<IList<FileDto>>(galleryFiles);
+
+        if (result.Cover is not null)
+            result.Cover.Url = (
+                await _fileService.GetFileUrl(result.Cover.FileId, cancellationToken)
             ).Url;
 
-        if (product.Images is not null)
+        if (result.GalleryImages is not null)
         {
-            foreach (var image in product.Images)
+            foreach (var image in result.GalleryImages)
             {
                 image.Url = (await _fileService.GetFileUrl(image.FileId, cancellationToken)).Url;
             }
         }
 
-        return product;
+        return result;
     }
 }

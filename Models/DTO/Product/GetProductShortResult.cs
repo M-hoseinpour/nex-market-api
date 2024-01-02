@@ -34,6 +34,11 @@ public class GetAllProductsMap : Profile
                             src.Images == null
                                 ? null
                                 : src.Images.FirstOrDefault(x => x.Type == ProductImageType.Cover)
+                                == null
+                                    ? null
+                                    : src.Images
+                                        .FirstOrDefault(x => x.Type == ProductImageType.Cover)
+                                        .File
                     )
             );
     }

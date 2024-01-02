@@ -14,8 +14,7 @@ public class GetPanelAllProductsResult
     public decimal Rating { get; set; }
     public ProductStatus Status { get; set; }
     public FileDto? Cover { get; set; }
-    public bool IsDiscount { get; set; }
-    public decimal? DiscountPercent { get; set; }
+    public decimal? DiscountPrice { get; set; }
     public IList<TagResult> Tags { get; set; } = new List<TagResult>();
 }
 
@@ -36,6 +35,11 @@ public class GetProductShortResultByAdminMap : Profile
                             src.Images == null
                                 ? null
                                 : src.Images.FirstOrDefault(x => x.Type == ProductImageType.Cover)
+                                == null
+                                    ? null
+                                    : src.Images
+                                        .FirstOrDefault(x => x.Type == ProductImageType.Cover)
+                                        .File
                     )
             );
     }

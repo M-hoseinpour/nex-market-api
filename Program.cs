@@ -133,6 +133,7 @@ builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<BrandService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ReviewService>();
+builder.Services.AddScoped<BannerService>();
 
 
 
