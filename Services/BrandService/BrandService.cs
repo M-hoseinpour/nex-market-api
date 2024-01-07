@@ -16,22 +16,24 @@ public class BrandService
     private readonly IWorkContext _workContext;
     private readonly IMapper _mapper;
     private readonly IRepository<Brand> _brandRepository;
+    private readonly PanelService _panelService;
     private readonly FileService.FileService _fileService;
 
     public BrandService(
         IRepository<Brand> brandRepository,
         IWorkContext workContext,
-        IMapper mapper, FileService.FileService fileService)
+        IMapper mapper, FileService.FileService fileService, PanelService panelService)
     {
         _brandRepository = brandRepository;
         _workContext = workContext;
         _mapper = mapper;
         _fileService = fileService;
+        _panelService = panelService;
     }
 
     public async Task AddBrand(BrandInput input, CancellationToken cancellationToken)
     {
-        var panelId = _workContext.GetPanelId();
+        var panelId = await _panelService.GetPanelId(cancellationToken);
 
         var brand = new Brand { Name = input.Name, PanelId = panelId, };
 
@@ -51,7 +53,7 @@ public class BrandService
 
         if (isAllBrands)
         {
-            var panelId = _workContext.GetPanelId();
+            var panelId = await _panelService.GetPanelId(cancellationToken);
             brandQuery = brandQuery.Where(x => x.PanelId == panelId);
         }
 
@@ -73,7 +75,7 @@ public class BrandService
 
     public async Task DeleteBrand(Guid brandGuid, CancellationToken cancellationToken)
     {
-        var panelId = _workContext.GetPanelId();
+        var panelId = await _panelService.GetPanelId(cancellationToken);
 
         var brand = await _brandRepository.Table
             .SingleOrDefaultAsync(x => x.Uuid == brandGuid && x.PanelId == panelId, cancellationToken);

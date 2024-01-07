@@ -144,7 +144,7 @@ public class UserService
         return await _staffRepository.TableNoTracking.Where(c => c.UserId == userId).SingleOrDefaultAsync();
     }
 
-    private async Task<Manager?> CheckIsManagerExist(int userId)
+    public async Task<Manager?> CheckIsManagerExist(int userId)
     {
         return await _managerRepository.TableNoTracking
             .Where(c => c.UserId == userId)

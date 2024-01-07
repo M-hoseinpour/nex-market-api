@@ -26,6 +26,8 @@ public class ProductService
     private readonly IWorkContext _workContext;
     private readonly FileService.FileService _fileService;
     private readonly IRepository<ProductImage> _productImageRepository;
+    private readonly PanelService _panelService;
+
 
     public ProductService(
         IMapper mapper,
@@ -35,7 +37,9 @@ public class ProductService
         IRepository<Tag> tagRepository,
         IRepository<Category> categoryRepository,
         IRepository<Brand> brandRepository,
-        FileService.FileService fileService, IRepository<ProductImage> productImageRepository)
+        FileService.FileService fileService,
+         IRepository<ProductImage> productImageRepository,
+         PanelService panelService)
     {
         _mapper = mapper;
         _productRepository = productRepository;
@@ -46,11 +50,12 @@ public class ProductService
         _brandRepository = brandRepository;
         _fileService = fileService;
         _productImageRepository = productImageRepository;
+        _panelService = panelService;
     }
 
     public async Task AddProduct(AddProductInput input, CancellationToken cancellationToken)
     {
-        var panelId = _workContext.GetPanelId();
+        var panelId = await _panelService.GetPanelId(cancellationToken);
 
         var brand = await _brandRepository.TableNoTracking.SingleOrDefaultAsync(
             x => x.Uuid == input.BrandGuid,
@@ -115,7 +120,7 @@ public class ProductService
         CancellationToken cancellationToken
     )
     {
-        var panelId = _workContext.GetPanelId();
+        var panelId = await _panelService.GetPanelId(cancellationToken);
         var product = await _productRepository.Table.SingleOrDefaultAsync(
             x => x.Uuid == productGuid,
             cancellationToken

@@ -15,6 +15,7 @@ public class PanelService
     private readonly IRepository<Manager> _managerRepository;
     private readonly IRepository<User> _userRepository;
     private readonly IRepository<Staff> _staffRepository;
+    private readonly UserService _userService;
     private readonly IWorkContext _workContext;
     private readonly IMapper _mapper;
 
@@ -24,7 +25,8 @@ public class PanelService
         IRepository<User> userRepository,
         IRepository<Staff> staffRepository,
         IWorkContext workContext,
-        IMapper mapper
+        IMapper mapper,
+        UserService userService
     )
     {
         _panelRepository = panelRepository;
@@ -33,6 +35,7 @@ public class PanelService
         _userRepository = userRepository;
         _staffRepository = staffRepository;
         _mapper = mapper;
+        _userService = userService;
     }
 
     public async Task AddPanel(PanelInput panelInput, CancellationToken cancellationToken)
@@ -96,7 +99,7 @@ public class PanelService
 
     public async Task<GetPanel> GetPanel(CancellationToken cancellationToken)
     {
-        var panelId = _workContext.GetPanelId();
+        var panelId = await GetPanelId(cancellationToken);
 
         var panel =
             await _panelRepository.TableNoTracking
@@ -166,5 +169,19 @@ public class PanelService
         staffMembers.Insert(0, managerMember);
 
         return staffMembers;
+    }
+
+    public async Task<int> GetPanelId(CancellationToken cancellationToken)
+    {
+        var panelId = _workContext.GetPanelId();
+
+        if (panelId is null)
+        {
+            var managerId = _workContext.GetManagerId();
+            var panel = await _panelRepository.TableNoTracking.FirstOrDefaultAsync(p => p.ManagerId == managerId, cancellationToken) ?? throw new NotFoundException("panel not found");
+            panelId = panel.Id;
+        }
+
+        return panelId ?? -1;
     }
 }

@@ -16,22 +16,26 @@ public class CategoryService
 {
     private readonly IWorkContext _workContext;
     private readonly IRepository<Category> _categoryRepository;
+    private readonly PanelService _panelService;
+
     private readonly IMapper _mapper;
 
     public CategoryService(
         IWorkContext workContext,
         IRepository<Category> categoryRepository,
-        IMapper mapper
+        IMapper mapper,
+        PanelService panelService
     )
     {
         _workContext = workContext;
         _categoryRepository = categoryRepository;
         _mapper = mapper;
+        _panelService = panelService;
     }
 
     public async Task AddCategory(CategoryInput input, CancellationToken cancellationToken)
     {
-        var panelId = _workContext.GetPanelId();
+        var panelId = await _panelService.GetPanelId(cancellationToken);
 
         var category = new Category { Name = input.Name, PanelId = panelId, };
 
@@ -62,7 +66,7 @@ public class CategoryService
 
         if (isAllCategories)
         {
-            var panelId = _workContext.GetPanelId();    
+            var panelId = await _panelService.GetPanelId(cancellationToken);    
             categoryQuery = categoryQuery.Where(x => x.PanelId == panelId);   
         }
 

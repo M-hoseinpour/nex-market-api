@@ -13,18 +13,20 @@ public class BannerService
 {
     private readonly IRepository<Banner> _bannerRepository;
     private readonly IWorkContext _workContext;
+    private readonly PanelService _panelService;
     private readonly IMapper _mapper;
 
-    public BannerService(IRepository<Banner> bannerRepository, IWorkContext workContext, IMapper mapper)
+    public BannerService(IRepository<Banner> bannerRepository, IWorkContext workContext, IMapper mapper, PanelService panelService)
     {
         _bannerRepository = bannerRepository;
         _workContext = workContext;
         _mapper = mapper;
+        _panelService = panelService;
     }
 
     public async Task AddBanner(BannerInput input, CancellationToken cancellationToken)
     {
-        var panelId = _workContext.GetPanelId();
+        var panelId = await _panelService.GetPanelId(cancellationToken);
 
         var newBanner = new Banner
         {
@@ -46,7 +48,7 @@ public class BannerService
 
         if (isAllBanners)
         {
-            var panelId = _workContext.GetPanelId();
+            var panelId = await _panelService.GetPanelId(cancellationToken);
             bannerQuery = bannerQuery.Where(x => x.PanelId == panelId);
         }
 

@@ -9,7 +9,7 @@ public interface IWorkContext
     int GetUserId();
     int GetStaffId();
     int GetManagerId();
-    int GetPanelId();
+    int? GetPanelId();
     UserType GetUserType();
     bool IsAuthenticated();
     string GetTokenFromHeader();
