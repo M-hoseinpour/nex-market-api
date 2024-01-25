@@ -78,6 +78,7 @@ public class UserService
         {
             var newCustomer = new Customer { User = newUser, Addresses = null };
             await _customerRepository.AddAsync(newCustomer, cancellationToken);
+            claims.Add(new(type: "customer-id", value: newCustomer.Id.ToString()));
         }
 
         if (input.UserType == UserType.Staff)
@@ -114,7 +115,12 @@ public class UserService
             new(type: "user-type", value: user.UserType.ToString())
         };
 
-        if (input.UserType == UserType.Staff)
+        if (input.UserType == UserType.Customer)
+        {
+            var customer = await CheckIsCustomerExist(user.Id) ?? throw new UserNotFoundException();
+            claims.Add(new(type: "customer-id", value: customer.Id.ToString()));
+        }
+        else if (input.UserType == UserType.Staff)
         {
             var staff = await CheckIsStaffExist(user.Id) ?? throw new UserNotFoundException();
             claims.Add(new Claim(type: "staff-id", value: staff.Id.ToString()));
@@ -244,7 +250,7 @@ public class UserService
     {
         if (input.FirstName.IsNullOrEmpty() || input.LastName.IsNullOrEmpty() || input.MobileNumber.IsNullOrEmpty())
             throw new BadRequestException();
-        
+
         var userId = _workContext.GetUserId();
         var userType = _workContext.GetUserType();
 
@@ -268,7 +274,7 @@ public class UserService
 
         if (queryParams.Uuid.HasValue)
             userQuery = userQuery.Where(x => x.Uuid == queryParams.Uuid);
-        
+
         if (queryParams.Role.HasValue)
             userQuery = userQuery.Where(x => x.UserType == queryParams.Role);
 
