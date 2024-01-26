@@ -197,6 +197,9 @@ public class ProductService
             x => x.Status == ProductStatus.Purchasable
         );
 
+        if (!queryParams.Title.IsNullOrEmpty())
+            productQuery = productQuery.Where(x => x.Name.Contains(queryParams.Title));
+
         if (queryParams.CategoryId.HasValue)
             productQuery = productQuery.Where(x => x.CategoryId == queryParams.CategoryId);
 

@@ -52,8 +52,25 @@ public class CartService
         if (product is null)
             throw new ProductNotFoundException();
 
+        var productInCart = await _cartRepository.TableNoTracking
+             .Include(x => x.Product)
+             .Where(p => p.Product.Uuid == product.Uuid)
+             .SingleOrDefaultAsync(cancellationToken: cancellationToken);
+
+        if (productInCart is not null)
+        {
+            if (productInCart.Quantity < dto.Quantity)
+            {
+                if (product.Quantity < dto.Quantity)
+                    throw new BadRequestException("Not enough product!");
+            }
+            productInCart.Quantity = dto.Quantity;
+            await _cartRepository.UpdateAsync(productInCart, cancellationToken: cancellationToken);
+            return;
+        }
+
         if (product.Quantity < dto.Quantity)
-            throw new BadRequestException();
+            throw new BadRequestException("Not enough product!");
 
         var cart = new CartItem
         {
@@ -90,8 +107,9 @@ public class CartService
 
         var cart = await _cartRepository
             .Table
+            .Include(x => x.Product)
             .FirstOrDefaultAsync(
-                predicate: x => x.Uuid == cartGuid && x.CustomerId == customerId,
+                predicate: x => x.Product.Uuid == cartGuid && x.CustomerId == customerId,
                 cancellationToken: cancellationToken
             );
 
@@ -104,7 +122,7 @@ public class CartService
     public async Task SubmitCart(SubmitCartInput input, CancellationToken cancellationToken)
     {
         var customerId = _workContext.GetCustomerId();
-        
+
         var cartItems = await _cartRepository
             .Table
             .Where(x => x.CustomerId == customerId)
@@ -112,10 +130,10 @@ public class CartService
             .ToListAsync(
                 cancellationToken: cancellationToken
             );
-        
+
         if (cartItems.IsNullOrEmpty())
             throw new CartIsEmptyException();
-        
+
         var address = await _addressRepository.TableNoTracking.FirstOrDefaultAsync(
             x => x.Uuid == input.AddressUuid,
             cancellationToken
@@ -123,7 +141,7 @@ public class CartService
 
         if (address is null || address.CustomerId != customerId)
             throw new BadRequestException();
-        
+
         var order = new Order
         {
             CustomerId = customerId,
@@ -142,7 +160,7 @@ public class CartService
                 Price = cartItem.Product.Price
             });
         }
-        
+
         await _orderRepository.AddAsync(order, cancellationToken);
 
         await _cartRepository.DropRangeAsync(cartItems, cancellationToken);

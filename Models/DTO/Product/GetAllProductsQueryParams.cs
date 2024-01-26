@@ -4,6 +4,7 @@ namespace market.Models.DTO.Product;
 
 public class GetAllProductsQueryParams : PaginationQueryParams
 {
+    public string? Title { get; set; }
     public int? CategoryId { get; set; }
     public int? BrandId { get; set; }
     public bool IsDiscount { get; set; } = false;
