@@ -71,7 +71,7 @@ public class UserController : ControllerBase
     }
     
     [HttpGet("cart")]
-    public async Task<FilteredResult<CartDto>> GetCart(
+    public async Task<FilteredResult<CartResultDto>> GetCart(
         [FromQuery] PaginationQueryParams queryParams,
         CancellationToken cancellationToken
     )

@@ -82,7 +82,7 @@ public class CartService
         await _cartRepository.AddAsync(entity: cart, cancellationToken: cancellationToken);
     }
 
-    public async Task<FilteredResult<CartDto>> GetCart(
+    public async Task<FilteredResult<CartResultDto>> GetCart(
         PaginationQueryParams queryParams,
         CancellationToken cancellationToken
     )
@@ -92,7 +92,7 @@ public class CartService
         var cart = await _cartRepository
             .TableNoTracking
             .Where(predicate: x => x.CustomerId == customerId)
-            .ProjectTo<CartDto>(configuration: _mapper.ConfigurationProvider)
+            .ProjectTo<CartResultDto>(configuration: _mapper.ConfigurationProvider)
             .ExecuteWithPaginationAsync(
                 paginationQueryParams: queryParams,
                 cancellationToken: cancellationToken
