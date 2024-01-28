@@ -8,6 +8,7 @@ using market.Models.DTO.BaseDto;
 using market.Models.DTO.Cart;
 using market.Models.Enum;
 using market.Services.CartService.Exceptions;
+using market.Services.FileService;
 using market.Services.ProductService.Exceptions;
 using market.SystemServices.Contracts;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ public class CartService
 {
     private readonly IRepository<CartItem> _cartRepository;
     private readonly IRepository<Product> _productRepository;
+    private readonly FileService.FileService _fileService;
     private readonly IWorkContext _workContext;
     private readonly IMapper _mapper;
     private readonly IRepository<Address> _addressRepository;
@@ -28,7 +30,9 @@ public class CartService
         IRepository<CartItem> cartRepository,
         IWorkContext workContext,
         IRepository<Product> productRepository,
-        IMapper mapper, IRepository<Address> addressRepository, IRepository<Order> orderRepository)
+        IMapper mapper, IRepository<Address> addressRepository,
+         IRepository<Order> orderRepository,
+         FileService.FileService fileService)
     {
         _cartRepository = cartRepository;
         _workContext = workContext;
@@ -36,6 +40,7 @@ public class CartService
         _mapper = mapper;
         _addressRepository = addressRepository;
         _orderRepository = orderRepository;
+        _fileService = fileService;
     }
 
     public async Task AddToCart(CartDto dto, CancellationToken cancellationToken)
@@ -97,6 +102,15 @@ public class CartService
                 paginationQueryParams: queryParams,
                 cancellationToken: cancellationToken
             );
+
+        foreach (var data in cart.Data)
+        {
+            if (data.Product.Cover is null)
+                continue;
+            var url = await _fileService.GetFileUrl(data.Product.Cover.FileId, cancellationToken);
+
+            data.Product.Cover.Url = url.Url;
+        }
 
         return cart;
     }
