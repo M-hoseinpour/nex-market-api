@@ -201,10 +201,10 @@ public class ProductService
             productQuery = productQuery.Where(x => x.Name.Contains(queryParams.Title));
 
         if (queryParams.CategoryId.HasValue)
-            productQuery = productQuery.Where(x => x.CategoryId == queryParams.CategoryId);
+            productQuery = productQuery.Where(x => x.Category.Uuid == queryParams.CategoryId);
 
         if (queryParams.BrandId.HasValue)
-            productQuery = productQuery.Where(x => x.BrandId == queryParams.BrandId);
+            productQuery = productQuery.Where(x => x.Brand.Uuid == queryParams.BrandId);
 
         if (queryParams.IsDiscount)
             productQuery = productQuery.Where(x => x.DiscountPrice != null);
