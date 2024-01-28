@@ -18,6 +18,7 @@ public class UserService
 {
     private readonly IRepository<User> _userRepository;
     private readonly IRepository<Customer> _customerRepository;
+    private readonly IRepository<Address> _addressRepository;
     private readonly IRepository<Staff> _staffRepository;
     private readonly IRepository<Manager> _managerRepository;
     private readonly IRepository<Panel> _panelRepository;
@@ -34,6 +35,7 @@ public class UserService
         IRepository<Staff> staffRepository,
         IRepository<Manager> managerRepository,
         IRepository<Panel> panelRepository,
+        IRepository<Address> addressRepository,
         IPasswordService passwordService,
         IJwtService jwtService,
         IWorkContext workContext,
@@ -49,6 +51,7 @@ public class UserService
         _workContext = workContext;
         _mapper = mapper;
         _fileService = fileService;
+        _addressRepository = addressRepository;
     }
 
     public async Task<RegisterResponse> RegisterUser(RegisterInput input, CancellationToken cancellationToken)
@@ -284,5 +287,18 @@ public class UserService
             .ExecuteWithPaginationAsync(queryParams, cancellationToken);
 
         return users;
+    }
+
+    public async Task<FilteredResult<AddressResponse>> GetUsersAddresses(PaginationQueryParams queryParams, CancellationToken cancellationToken)
+    {
+        return await _addressRepository.TableNoTracking
+             .ProjectTo<AddressResponse>(_mapper.ConfigurationProvider)
+             .ExecuteWithPaginationAsync(queryParams, cancellationToken);
+    }
+
+    public async Task AddUsersAddresses(string location, CancellationToken cancellationToken)
+    {
+        var CustomerId = _workContext.GetCustomerId();
+        await _addressRepository.AddAsync(new Address { Location = location, CustomerId = CustomerId }, cancellationToken);
     }
 }

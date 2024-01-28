@@ -69,7 +69,7 @@ public class UserController : ControllerBase
     {
         await _cartService.AddToCart(dto: dto, cancellationToken: cancellationToken);
     }
-    
+
     [HttpGet("cart")]
     public async Task<FilteredResult<CartResultDto>> GetCart(
         [FromQuery] PaginationQueryParams queryParams,
@@ -78,7 +78,7 @@ public class UserController : ControllerBase
     {
         return await _cartService.GetCart(queryParams: queryParams, cancellationToken: cancellationToken);
     }
-    
+
     [HttpDelete("cart/{id:guid}")]
     public async Task DeleteFromCart(
         Guid id,
@@ -87,7 +87,7 @@ public class UserController : ControllerBase
     {
         await _cartService.DeleteFromCart(cartGuid: id, cancellationToken: cancellationToken);
     }
-    
+
     [HttpPost("cart/submit")]
     public async Task SubmitCart(
         SubmitCartInput input,
@@ -96,7 +96,7 @@ public class UserController : ControllerBase
     {
         await _cartService.SubmitCart(input: input, cancellationToken: cancellationToken);
     }
-    
+
     [HttpGet]
     public async Task<FilteredResult<ProfileBriefResponse>> GetUsers(
         [FromQuery] GetUsersQueryParams queryParams,
@@ -104,5 +104,23 @@ public class UserController : ControllerBase
     )
     {
         return await _userService.GetUsers(queryParams: queryParams, cancellationToken: cancellationToken);
+    }
+
+    [HttpGet("addresses")]
+    public async Task<FilteredResult<AddressResponse>> GetUsersAddresses(
+        [FromQuery] GetUsersQueryParams queryParams,
+        CancellationToken cancellationToken
+    )
+    {
+        return await _userService.GetUsersAddresses(queryParams: queryParams, cancellationToken: cancellationToken);
+    }
+
+    [HttpPost("address")]
+    public async Task GetUsersAddresses(
+        string address,
+        CancellationToken cancellationToken
+    )
+    {
+        await _userService.AddUsersAddresses(address, cancellationToken: cancellationToken);
     }
 }

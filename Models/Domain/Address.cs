@@ -11,7 +11,7 @@ public class Address : Entity
     public string? Longitude { get; set; }
     public string? Latitude { get; set; }
     public int CustomerId { get; set; }
-    public virtual required Customer Customer { get; set; }
+    public virtual Customer Customer { get; set; }
 
 }
 
