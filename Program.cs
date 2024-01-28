@@ -23,6 +23,7 @@ using System.Security.Cryptography;
 using market.Services;
 using market.Services.BrandService;
 using market.Services.CartService;
+using market.Services.OrderService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -128,6 +129,7 @@ builder.Services.AddSingleton<IRandomService, RandomService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<PanelService>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<FileService>();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<BrandService>();
