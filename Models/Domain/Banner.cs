@@ -9,6 +9,7 @@ namespace market.Models.Domain;
 public class Banner : Entity
 {
     public required string Title { get; set; }
+    public string? Detail { get; set; }
     public Guid FileId { get; set; }
     public virtual File File { get; set; } = null!;
     public int PanelId { get; set; }
@@ -26,13 +27,14 @@ public class BannerConfiguration : IEntityTypeConfiguration<Banner>
         builder.Property(x => x.Title).IsRequired();
         builder.Property(x => x.FileId).IsRequired();
         builder.Property(x => x.PanelId).IsRequired();
+        builder.Property(x => x.Detail);
 
 
         builder
             .HasOne(x => x.File)
             .WithOne()
             .HasForeignKey<Banner>(x => x.FileId);
-        
+
         builder
             .HasOne(x => x.Panel)
             .WithMany()

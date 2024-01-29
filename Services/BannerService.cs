@@ -32,7 +32,8 @@ public class BannerService
         {
             Title = input.Title,
             FileId = input.FileId,
-            PanelId = panelId
+            PanelId = panelId,
+            Detail = input.Detail
         };
 
         await _bannerRepository.AddAsync(newBanner, cancellationToken);
