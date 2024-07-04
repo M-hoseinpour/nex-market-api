@@ -54,8 +54,8 @@ public class ProductController : ControllerBase
 
     [HttpGet("{id:guid}/reviews")]
     public async Task<FilteredResult<ReviewResult>> GetReviews(
-        Guid id,
-        PaginationQueryParams queryParams,
+        [FromRoute] Guid id,
+        [FromQuery] PaginationQueryParams queryParams,
         CancellationToken cancellationToken
     )
     {
