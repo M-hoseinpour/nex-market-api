@@ -38,8 +38,8 @@ public class ProductService
         IRepository<Category> categoryRepository,
         IRepository<Brand> brandRepository,
         FileService.FileService fileService,
-         IRepository<ProductImage> productImageRepository,
-         PanelService panelService)
+        IRepository<ProductImage> productImageRepository,
+        PanelService panelService)
     {
         _mapper = mapper;
         _productRepository = productRepository;
@@ -201,7 +201,10 @@ public class ProductService
             productQuery = productQuery.Where(x => x.Name.Contains(queryParams.Title));
 
         if (queryParams.CategoryId.HasValue)
-            productQuery = productQuery.Where(x => x.Category.Uuid == queryParams.CategoryId);
+            productQuery = productQuery.Where(x =>
+                x.Category.ParentCategory.Uuid == queryParams.CategoryId ||
+                x.Category.Uuid == queryParams.CategoryId);
+
 
         if (queryParams.BrandId.HasValue)
             productQuery = productQuery.Where(x => x.Brand.Uuid == queryParams.BrandId);

@@ -21,15 +21,15 @@ public class FinancialTransactionService
 
     public async Task PayOrder(PayOrderInput input, CancellationToken cancellationToken)
     {
-        //todo revise this
-        // var order = await _orderRepository.TableNoTracking.Include(x => x.OrderDetails).FirstOrDefaultAsync(o => o.Uuid == input.OrderUuid, cancellationToken: cancellationToken) ?? throw new NotFoundException("order not found");
-        //
-        // decimal payAmount = 0;
-        // foreach (var orderDetail in order.OrderDetails)
-        // {
-        //     payAmount += orderDetail.Quantity * orderDetail.Price;
-        // }
-        //
-        // await _financialRepository.AddAsync(new FinancialTransaction { Amount = payAmount, FinancialTransactionType = Models.Enum.FinancialTransactionType.Order, Order = order, FinancialTransactionStatus = BanTransactionStatus.Succeed }, cancellationToken: cancellationToken);
+         var order = await _orderRepository.TableNoTracking.Include(x => x.OrderDetails).FirstOrDefaultAsync(o => o.Uuid == input.OrderUuid, cancellationToken: cancellationToken) ?? throw new NotFoundException("order not found");
+        
+         decimal payAmount = 0;
+         foreach (var orderDetail in order.OrderDetails)
+         {
+             payAmount += orderDetail.Quantity * orderDetail.Price;
+         }
+
+         order.Status = OrderStatus.Finalized;
+         await _orderRepository.UpdateAsync(order, cancellationToken);
     }
 }

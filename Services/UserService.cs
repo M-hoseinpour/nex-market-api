@@ -289,9 +289,14 @@ public class UserService
         return users;
     }
 
-    public async Task<FilteredResult<AddressResponse>> GetUsersAddresses(PaginationQueryParams queryParams, CancellationToken cancellationToken)
+    public async Task<FilteredResult<AddressResponse>> GetUsersAddresses(GetUsersQueryParams queryParams, CancellationToken cancellationToken)
     {
-        return await _addressRepository.TableNoTracking
+        var addressQuery = _addressRepository.TableNoTracking;
+
+        if (queryParams.Uuid.HasValue)
+            addressQuery = addressQuery.Where(x => x.Customer.User.Uuid == queryParams.Uuid);
+        
+        return await addressQuery
              .ProjectTo<AddressResponse>(_mapper.ConfigurationProvider)
              .ExecuteWithPaginationAsync(queryParams, cancellationToken);
     }
